@@ -21,12 +21,4 @@ async function startServer() {
   }
 }
 
-// Only start server when run directly (not when imported by Vercel)
-if (require.main === module) {
-  startServer().catch((err) => {
-    console.error('Server startup error:', err);
-    process.exit(1);
-  });
-}
-
-module.exports = app; // Export for Vercel
+startServer();
