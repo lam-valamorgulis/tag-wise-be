@@ -7,7 +7,11 @@ const api = require('./routes/api');
 const app = express();
 
 // CORS configuration
-const allowedOrigins = ['http://localhost:3000', 'http://localhost:5173'];
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'https://tag-wise-be.vercel.app',
+];
 app.use(
   cors({
     origin: allowedOrigins,
