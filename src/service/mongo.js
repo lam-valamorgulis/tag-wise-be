@@ -25,18 +25,3 @@ const mongoose = require('mongoose');
 //   mongoConnect,
 //   mongoDisconnect,
 // };
-
-let cachedDb = null;
-
-async function mongoConnect() {
-  if (cachedDb) return cachedDb;
-
-  const client = await mongoose.connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
-  cachedDb = client.connection;
-  return cachedDb;
-}
-
-module.exports = { mongoConnect };
