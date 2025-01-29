@@ -28,9 +28,6 @@ app.use(express.json());
 app.get('/', (req, res) => {
   res.json({ message: 'API is working!' });
 });
-app.get('*', (req, res) => {
-  res.send('Hello from Express on Vercel!');
-});
 
 app.use('/v1/api', api);
 
