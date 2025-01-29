@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
-// const commentRoutes = require('./routes/commentRoutes'); // Adjust the path as necessary
 
 const api = require('./routes/api');
 
@@ -23,6 +22,9 @@ app.use(morgan('combined'));
 app.use(express.json());
 
 app.use('/v1/api', api);
-// app.use('/comments', commentRoutes);
+// Define API route
+app.get('/', (req, res) => {
+  res.json({ message: 'API is working!' });
+});
 
 module.exports = app;
