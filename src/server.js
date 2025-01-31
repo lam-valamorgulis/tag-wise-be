@@ -1,5 +1,4 @@
 const http = require('http');
-// const serverless = require('serverless-http');
 
 require('dotenv').config({ path: './src/.env' });
 
