@@ -1,4 +1,5 @@
 function extractStringBetweenUnderscoreAndDash(input) {
+  console.log('Extracting string between _ and - from:', input);
   // Regular expression to match the string between _ and -
   const regex = /_([^-]+)-/;
   const match = input.match(regex);

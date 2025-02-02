@@ -1,5 +1,5 @@
 const getPropertyAdobeApi = require('../../models/property.model');
-const extractStringBetweenUnderscoreAndDash = require('../../utils/utils');
+const { extractStringBetweenUnderscoreAndDash } = require('../../utils/utils');
 const siteCode = require('../../data/siteCode');
 
 async function httpGetDetailProperty(req, res) {
@@ -18,6 +18,8 @@ async function httpGetDetailProperty(req, res) {
       });
     }
 
+    console.log('Property details:', propertyDetails);
+
     // retrieve information about the property from the named property
     const namedProperty = extractStringBetweenUnderscoreAndDash(
       propertyDetails.data.attributes.name,
@@ -29,7 +31,7 @@ async function httpGetDetailProperty(req, res) {
     console.log(`Retrieved site code: ${propertySiteCode}`);
 
     // Return the property details
-    return res.status(200).json({ propertySiteCode });
+    return res.status(200).json(propertySiteCode);
   } catch (error) {
     console.error('Error fetching property details:', error);
     return res.status(500).json({

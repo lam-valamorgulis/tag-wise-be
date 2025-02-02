@@ -1,4 +1,7 @@
-const { getRuleComponentsAdobeApi } = require('../../models/rule.model');
+const {
+  getRuleComponentsAdobeApi,
+  getRulesLibraryAdobeApi,
+} = require('../../models/rule.model');
 const {
   validateRuleName,
   validateDateRangeComponents,
@@ -13,12 +16,13 @@ async function httpValidateRule(req, res) {
 
   const { ruleName, isEU, isHqRule, keyWord, isShopSection } = req.body;
 
-  // console.log(`Rule ID: ${ruleId}`);
-  // console.log(`Rule name: ${ruleName}`);
-  // console.log(`RC id: ${ruleComponentId}`);
+  if (!ruleName) {
+    return res.status(400).json({
+      error: 'Missing required parameter: ruleName',
+    });
+  }
 
   const checkName = validateRuleName(ruleName);
-  // console.log(checkName);
 
   try {
     // Simulate fetching data from a database or external service
@@ -33,25 +37,20 @@ async function httpValidateRule(req, res) {
       rulesLibrary.data,
       isHqRule,
     );
-    // console.log(dateRangeComponents);
 
     const checkCookies = validateDateCookieConditions(rulesLibrary.data, isEU);
-    // console.log(checkCookies);
 
     const checkPathString = validatePathContainKeyWords(
       rulesLibrary.data,
       keyWord,
     );
-    console.log(checkPathString);
 
     const checkWindowLoad = validateWindowLoad(
       rulesLibrary.data,
       isShopSection,
     );
-    console.log(checkWindowLoad);
 
     const checkActions = validateActions(rulesLibrary.data);
-    console.log(checkActions);
 
     return res.status(200).json({
       checkName: checkName,
@@ -71,4 +70,33 @@ async function httpValidateRule(req, res) {
   }
 }
 
-module.exports = { httpValidateRule };
+async function httpGetListRule(req, res) {
+  const libId = req.params.libraryId;
+
+  try {
+    const rulesLibrary = await getRulesLibraryAdobeApi(libId);
+
+    if (!rulesLibrary) {
+      return res.status(404).json({
+        error: 'Library not found',
+      });
+    }
+
+    const rulesList = [];
+    rulesLibrary.data.forEach((rule) => {
+      const ruleItem = {};
+      ruleItem.name = rule.attributes.name;
+      ruleItem.id = rule.id;
+      rulesList.push(ruleItem);
+    });
+
+    return res.status(200).json(rulesList);
+  } catch (error) {
+    console.error('Error fetching library details:', error);
+    return res.status(500).json({
+      error: 'Internal server error',
+    });
+  }
+}
+
+module.exports = { httpValidateRule, httpGetListRule };

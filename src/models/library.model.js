@@ -1,27 +1,31 @@
 const adobeApi = require('../service/adobeApi');
 
-async function searchAdobeApi(libraryName) {
-  console.log('Searching for library:', libraryName);
+async function searchAdobeApi(keyWords, relationships) {
+  console.log('Searching:', keyWords);
 
   try {
     const response = await adobeApi.post('/search', {
       data: {
-        size: 1,
+        size: 10,
         query: {
           'attributes.name': {
-            value: libraryName,
+            value: keyWords,
           },
+          ...(relationships && {
+            'relationships.property.data.id': {
+              value: relationships,
+            },
+          }),
         },
+
         sort: [
           {
             'attributes.created_at': 'desc',
           },
         ],
-        resource_types: ['libraries'],
+        resource_types: ['libraries', 'properties'],
       },
     });
-
-    console.log('Adobe API response:', response.data);
 
     return response.data;
   } catch (error) {
@@ -64,6 +68,30 @@ async function searchPropertyApi(propertyId) {
   }
 }
 
+async function searchCompanyApi(companyId) {
+  console.log('Searching for companyId:', companyId);
+
+  try {
+    const response = await adobeApi.get(`/companies/${companyId}`);
+
+    console.log('Adobe API response:', response.data);
+    return response.data;
+  } catch (error) {
+    // Improved error handling
+    if (error.response) {
+      console.error(
+        'Adobe API Error Response:',
+        error.response.status,
+        error.response.statusText,
+        error.response.data,
+      );
+    } else {
+      console.error('Error calling Adobe API:', error.message);
+    }
+    throw new Error('Failed to fetch data from Adobe API');
+  }
+}
+
 async function getRulesLibraryAdobeApi(libraryId) {
   console.log('Searching for property:', libraryId);
 
@@ -71,8 +99,6 @@ async function getRulesLibraryAdobeApi(libraryId) {
     const response = await adobeApi.get(
       `/libraries/${libraryId}/rules?page[size]=100&page[number]=1`,
     );
-
-    console.log('Adobe API response:', response.data);
 
     return response.data;
   } catch (error) {
@@ -95,4 +121,5 @@ module.exports = {
   searchAdobeApi,
   searchPropertyApi,
   getRulesLibraryAdobeApi,
+  searchCompanyApi,
 };
