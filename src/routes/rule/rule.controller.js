@@ -5,16 +5,19 @@ const {
 const {
   validateRuleName,
   validateDateRangeComponents,
-  validateDateCookieConditions,
+  validateCookieConditions,
   validatePathContainKeyWords,
   validateWindowLoad,
   validateActions,
+  validateRuleOrder,
+  validateCookiesEvent,
 } = require('../../utils/utils');
 
 async function httpValidateRule(req, res) {
   const ruleId = req.params.ruleComponentId;
 
-  const { ruleName, isEU, isHqRule, keyWord, isShopSection } = req.body;
+  const { ruleName, isHqRules, isRequiredConsent, isShopSection, keyWord } =
+    req.body;
 
   if (!ruleName) {
     return res.status(400).json({
@@ -22,6 +25,7 @@ async function httpValidateRule(req, res) {
     });
   }
 
+  // Check Name
   const checkName = validateRuleName(ruleName);
 
   try {
@@ -33,32 +37,52 @@ async function httpValidateRule(req, res) {
         error: 'Library not found',
       });
     }
-    const dateRangeComponents = validateDateRangeComponents(
+
+    // Check Events
+    const checkWindowLoad = validateWindowLoad(
       rulesLibrary.data,
-      isHqRule,
+      isShopSection,
     );
 
-    const checkCookies = validateDateCookieConditions(rulesLibrary.data, isEU);
+    const checkRuleOrder = validateRuleOrder(rulesLibrary.data, isHqRules);
+
+    const checkCookiesEvent = validateCookiesEvent(
+      rulesLibrary.data,
+      isRequiredConsent,
+    );
+
+    // Check conditions
+    const checkDateRange = validateDateRangeComponents(
+      rulesLibrary.data,
+      isHqRules,
+    );
 
     const checkPathString = validatePathContainKeyWords(
       rulesLibrary.data,
       keyWord,
     );
 
-    const checkWindowLoad = validateWindowLoad(
+    const checkCookiesCondition = validateCookieConditions(
       rulesLibrary.data,
-      isShopSection,
+      isRequiredConsent,
     );
 
+    // check actions
     const checkActions = validateActions(rulesLibrary.data);
 
     return res.status(200).json({
       checkName: checkName,
-      checkCondition: {
-        dateRangeComponents,
-        checkCookies,
-        checkPathString,
+      checkEvents: {
         checkWindowLoad,
+        checkRuleOrder,
+        checkCookiesEvent,
+      },
+      checkCondition: {
+        checkDateRange,
+        checkPathString,
+        checkCookiesCondition,
+      },
+      checkActions: {
         checkActions,
       },
     });

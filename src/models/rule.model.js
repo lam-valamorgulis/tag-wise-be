@@ -28,11 +28,7 @@ async function getRuleComponentsAdobeApi(ruleId) {
 async function getRulesLibraryAdobeApi(libraryId) {
   console.log('Searching for libraryId:', libraryId);
   try {
-    //             "related": "https://reactor.adobe.io/libraries/LBb174d60bdbd34f87a2e9466fadaacae0/rules",
-
     const response = await adobeApi.get(`/libraries/${libraryId}/rules`);
-
-    console.log('Adobe API response:', response.data, 32);
 
     return response.data;
   } catch (error) {
