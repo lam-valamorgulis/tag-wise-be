@@ -10,7 +10,7 @@ const app = express();
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5173',
-  'https://tag-wise-be.vercel.app',
+  'https://tag-wise-fe.vercel.app',
 ];
 app.use(
   cors({
