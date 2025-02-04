@@ -41,20 +41,29 @@ async function httpSearchLibrary(req, res) {
       (prop) => prop.attributes.name === propertyName,
     );
 
-    const library = await searchAdobeApi(libraryName, property.id);
-    console.log('Library:', library);
+    const libraryList = await searchAdobeApi(libraryName, property.id);
 
-    if (!library.data || library.data.length === 0) {
+    if (!libraryList.data || libraryList.data.length === 0) {
       return res.status(500).json({
         error: 'Failed to retrieve library data',
       });
     }
 
+    // Step 3: Filter libraries to find the one with the matching library name
+    const library = libraryList.data.find(
+      (lib) => lib.attributes.name === libraryName,
+    );
+
+    if (!library) {
+      return res.status(404).json({
+        error: 'Library not found',
+      });
+    }
+
     // Step 4: Return the combined result
     return res.status(200).json({
-      library: library.data[0],
+      library: library,
       property,
-      // company,
     });
   } catch (error) {
     // Error handling for failed API calls

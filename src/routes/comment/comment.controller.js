@@ -3,9 +3,15 @@ const Comment = require('../../models/commenTemplate/comment.mongo');
 
 async function httpGetAllComments(req, res) {
   try {
-    const { category, hashtag } = req.query;
-    const filter = {};
+    // Decode URL-encoded parameters
+    const category = req.query.category
+      ? decodeURIComponent(req.query.category)
+      : undefined;
+    const hashtag = req.query.hashtag
+      ? decodeURIComponent(req.query.hashtag)
+      : undefined;
 
+    const filter = {};
     if (category) filter.category = category;
     if (hashtag) filter.hashtag = hashtag;
 
@@ -21,17 +27,18 @@ async function httpGetAllComments(req, res) {
 
 async function httpAddComment(req, res) {
   try {
-    const { category, commentDetail, hashtag } = req.body;
+    const { category, purpose, commentDetail, hashtag } = req.body;
 
-    if (!category || !commentDetail) {
+    if (!category || !purpose || !commentDetail) {
       return res.status(400).json({
         error: 'Missing required fields',
-        message: 'Category and comment detail are required',
+        message: 'Category, purpose, and comment detail are required',
       });
     }
 
     const newComment = new Comment({
       category,
+      purpose,
       commentDetail,
       hashtag: hashtag || '',
     });
@@ -49,11 +56,18 @@ async function httpAddComment(req, res) {
 async function httpUpdateComment(req, res) {
   try {
     const commentId = req.params.id;
-    const updateData = req.body;
+    const { category, purpose, commentDetail, hashtag } = req.body;
+
+    if (!category || !purpose || !commentDetail) {
+      return res.status(400).json({
+        error: 'Missing required fields',
+        message: 'Category, purpose, and comment detail are required',
+      });
+    }
 
     const updatedComment = await Comment.findByIdAndUpdate(
       commentId,
-      updateData,
+      { category, purpose, commentDetail, hashtag },
       { new: true, runValidators: true },
     );
 

@@ -8,6 +8,11 @@ const commentSchema = new mongoose.Schema(
       trim: true,
       index: true, // Add index for faster filtering
     },
+    purpose: {
+      type: String,
+      required: [true, 'Purpose is required'],
+      trim: true,
+    },
     commentDetail: {
       type: String,
       required: [true, 'Comment detail is required'],

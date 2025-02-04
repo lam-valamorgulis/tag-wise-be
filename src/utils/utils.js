@@ -45,7 +45,9 @@ function validateRuleName(ruleName) {
   // Validation checks
   const validations = {
     userType: userType.startsWith('LC'),
-    siteSection: ['B2C', 'B2B', 'CS', 'shop'].includes(siteSection),
+    siteSection: ['B2C', 'B2B', 'CS', 'SHOP'].includes(
+      siteSection.toUpperCase(),
+    ),
   };
 
   return {
@@ -341,12 +343,21 @@ function validateCookieConditions(components, isEU) {
 
 function validatePathContainKeyWords(components, keyWords) {
   const result = {
+    conditionElement: [],
     isContainQueryPath: false,
     validComponents: [],
     invalidComponents: [],
     totalChecked: 0,
     bypassedComponents: [],
   };
+
+  result.conditionElement = [
+    ...new Set(
+      components
+        .map((component) => component.attributes.delegate_descriptor_id)
+        .filter((id) => id.startsWith('core::conditions')),
+    ),
+  ];
 
   const filteredComponents = components.filter(
     (component) =>
@@ -358,7 +369,7 @@ function validatePathContainKeyWords(components, keyWords) {
   if (filteredComponents.length === 0) {
     result.bypassedComponents.push({
       isValid: true,
-      reason: 'Bypass: Does not contain path-and-querystring condition.',
+      reason: 'Bypass: Does not contain path-and-query string condition.',
     });
     return result;
   }
@@ -408,6 +419,7 @@ function validateWindowLoad(components, isShopSection) {
     isRuleContainWL: false,
     eventComponents: [],
     validComponents: [],
+    invalidComponents: [],
     totalChecked: components.length,
   };
 
@@ -425,33 +437,34 @@ function validateWindowLoad(components, isShopSection) {
     'core::events::data-element-change',
   );
 
-  if (isShopSection && hasWindowLoad && hasDataElementChange) {
-    result.validComponents.push({
-      isValid: true,
-      reason:
-        'Rule valid shop section: both window-loaded and data-element-change present.',
-    });
-  } else if (isShopSection) {
-    result.validComponents.push({
-      isValid: true,
-      reason: 'Rule valid shop section:core event present, non-window-loaded',
-    });
-  } else if (hasWindowLoad) {
-    result.validComponents.push({
-      isValid: true,
-      reason: 'Rule valid non-shop section: window-loaded event present.',
-    });
+  if (isShopSection) {
+    if (hasWindowLoad && hasDataElementChange) {
+      result.validComponents.push({
+        isValid: true,
+        reason:
+          'Rule valid shop section: both window-loaded and data-element-change present.',
+      });
+    } else if (hasWindowLoad && !hasDataElementChange) {
+      result.invalidComponents.push({
+        isValid: false,
+        reason: 'Rule invalid shop section: Have WL event - Missing DEC',
+      });
+    } else if (!hasWindowLoad) {
+      result.validComponents.push({
+        isValid: true,
+        reason: "Rule valid shop section: rule doesn't contain WL",
+      });
+    }
   } else {
     result.validComponents.push({
       isValid: true,
       reason:
-        'Rule valid non-shop section: core event present, non-window-loaded',
+        'Rule valid non-shop section: core event present or non-window-loaded',
     });
   }
 
   return result;
 }
-
 function validateRuleOrder(components, isHqRules) {
   const result = {
     checkComponents: [],
@@ -487,6 +500,7 @@ function validateRuleOrder(components, isHqRules) {
 function validateCookiesEvent(components, isRequiredConsent) {
   const result = {
     validatedComponents: [],
+    eventComponents: [],
     totalChecked: components.length,
   };
 
@@ -497,11 +511,17 @@ function validateCookiesEvent(components, isRequiredConsent) {
         'Not required consent mode, bypassing consent mode check on Event.',
     });
   } else {
-    const hasCookiesEvent = components.some(
+    const cookiesEventComponents = components.filter(
       (component) =>
         component.attributes.delegate_descriptor_id ===
         'core::events::direct-call',
     );
+
+    result.eventComponents = cookiesEventComponents.map(
+      (component) => component.attributes.delegate_descriptor_id,
+    );
+
+    const hasCookiesEvent = cookiesEventComponents.length > 0;
 
     result.validatedComponents.push({
       isValid: hasCookiesEvent,
@@ -516,6 +536,7 @@ function validateCookiesEvent(components, isRequiredConsent) {
 
 function validateActions(components) {
   const result = {
+    isImplementedByCustomCode: true,
     validComponents: [],
     totalChecked: 0,
   };
@@ -528,10 +549,8 @@ function validateActions(components) {
   );
 
   if (customCodeComponents.length === 0) {
-    return {
-      isValid: false,
-      reason: 'Local rule must be implemented in Custom code',
-    };
+    result.isImplementedByCustomCode = false;
+    return result;
   }
 
   const piiPatterns = [
