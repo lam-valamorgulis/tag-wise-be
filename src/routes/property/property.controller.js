@@ -25,7 +25,10 @@ async function httpGetDetailProperty(req, res) {
     const propertySiteCode = siteCode.siteCode[namedProperty];
 
     // Return the property details
-    return res.status(200).json(propertySiteCode);
+    return res.status(200).json({
+      propertyName: propertyDetails.data.attributes.name || '',
+      propertySiteCode,
+    });
   } catch (error) {
     // console.error('Error fetching property details:', error);
     return res.status(500).json({

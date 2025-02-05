@@ -1,5 +1,26 @@
 const adobeApi = require('../service/adobeApi');
 
+async function getLibraryByIdApi(libraryId) {
+  try {
+    const response = await adobeApi.get(`/libraries/${libraryId}`);
+
+    return response.data;
+  } catch (error) {
+    // Improved error handling
+    if (error.response) {
+      console.error(
+        'Adobe API Error Response:',
+        error.response.status,
+        error.response.statusText,
+        error.response.data,
+      );
+    } else {
+      console.error('Error calling Adobe API:', error.message);
+    }
+    throw new Error('Failed to fetch data from Adobe API');
+  }
+}
+
 async function createAdobeLibraryApi(propertyId, libraryName) {
   console.log(
     `Creating Library "${libraryName}" for Property ID: ${propertyId}`,
@@ -156,6 +177,7 @@ module.exports = {
   searchAdobeApi,
   searchPropertyApi,
   getRulesLibraryAdobeApi,
+  getLibraryByIdApi,
   searchCompanyApi,
   createAdobeLibraryApi,
 };

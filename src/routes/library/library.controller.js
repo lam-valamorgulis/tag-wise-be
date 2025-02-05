@@ -2,9 +2,8 @@ const {
   searchAdobeApi,
   getRulesLibraryAdobeApi,
   createAdobeLibraryApi,
-  // searchCompanyApi,
+  getLibraryByIdApi,
 } = require('../../models/library.model');
-
 const { extractThirdSegment } = require('../../utils/utils');
 
 function countSegments(arr) {
@@ -107,14 +106,21 @@ async function httpBulkCreateLibrary(req, res) {
 
 async function httpLibrarySummary(req, res) {
   const libraryId = req.params.id;
-  console.log(`Summary for library ID: ${libraryId}`);
 
   try {
+    const library = await getLibraryByIdApi(libraryId);
+
+    if (!library) {
+      return res.status(404).json({
+        error: 'Library is not found',
+      });
+    }
+
     const rulesLibrary = await getRulesLibraryAdobeApi(libraryId);
 
     if (!rulesLibrary) {
       return res.status(404).json({
-        error: 'Library not found',
+        error: 'Rule Library not found',
       });
     }
 
@@ -124,6 +130,7 @@ async function httpLibrarySummary(req, res) {
     });
 
     return res.status(200).json({
+      libraryName: library.data.attributes.name || '',
       rulesName: countSegments(rulesName),
       total: rulesLibrary.data.length,
     });
