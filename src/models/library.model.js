@@ -1,5 +1,40 @@
 const adobeApi = require('../service/adobeApi');
 
+async function createAdobeLibraryApi(propertyId, libraryName) {
+  console.log(
+    `Creating Library "${libraryName}" for Property ID: ${propertyId}`,
+  );
+
+  try {
+    const response = await adobeApi.post(
+      `/properties/${propertyId}/libraries`,
+      {
+        data: {
+          attributes: {
+            name: libraryName,
+          },
+          type: 'libraries',
+        },
+      },
+    );
+
+    console.log('Library Created:', response.data);
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      console.error(
+        'Adobe API Error Response:',
+        error.response.status,
+        error.response.statusText,
+        error.response.data,
+      );
+    } else {
+      console.error('Error calling Adobe API:', error.message);
+    }
+    throw new Error('Failed to create library in Adobe API');
+  }
+}
+
 async function searchAdobeApi(keyWords, relationships) {
   console.log('Searching:', keyWords);
 
@@ -122,4 +157,5 @@ module.exports = {
   searchPropertyApi,
   getRulesLibraryAdobeApi,
   searchCompanyApi,
+  createAdobeLibraryApi,
 };

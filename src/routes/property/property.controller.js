@@ -1,4 +1,5 @@
 const getPropertyAdobeApi = require('../../models/property.model');
+const { searchAdobeApi } = require('../../models/library.model');
 const { extractStringBetweenUnderscoreAndDash } = require('../../utils/utils');
 const siteCode = require('../../data/siteCode');
 
@@ -33,4 +34,40 @@ async function httpGetDetailProperty(req, res) {
   }
 }
 
-module.exports = { httpGetDetailProperty };
+async function httpGetListProperty(req, res) {
+  const { propertyName } = req.body;
+
+  // Validate the request body
+  if (!propertyName) {
+    return res.status(400).json({
+      error: 'Missing required propertyName',
+    });
+  }
+
+  try {
+    // Step 1: Use the propertiy name to search for property:
+    const properties = await searchAdobeApi(propertyName);
+
+    if (!properties.data) {
+      return res.status(500).json({
+        error: 'Failed to retrieve property data',
+      });
+    }
+    const result = properties.data.map((item) => ({
+      propertyId: item.id,
+      propertyName: item.attributes.name,
+    }));
+
+    // Step 4: Return the combined result
+    return res.status(200).json({ data: result });
+  } catch (error) {
+    // Error handling for failed API calls
+    return res.status(500).json({
+      error:
+        'An error occurred while processing the library or property API calls',
+      details: error.message,
+    });
+  }
+}
+
+module.exports = { httpGetDetailProperty, httpGetListProperty };
