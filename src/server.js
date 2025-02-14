@@ -12,7 +12,7 @@ const server = http.createServer(app);
 async function startServer() {
   try {
     await mongoConnect();
-    server.listen(PORT, () => {
+    server.listen(PORT, '0.0.0.0', () => {
       console.log(`Listening on port ${PORT}...`);
     });
   } catch (err) {
