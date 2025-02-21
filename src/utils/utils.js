@@ -1,3 +1,5 @@
+const { mappingProfile } = require('../data/mappingProfile');
+
 function extractStringBetweenUnderscoreAndDash(input) {
   // Regular expression to match the string between _ and -
   const regex = /_([^-]+)-/;
@@ -595,6 +597,19 @@ function validateActions(components) {
   return result;
 }
 
+// Function to query the mapping data
+
+// Function to query the mapping data
+function queryMapping(orgCategory, requestKey) {
+  if (Object.prototype.hasOwnProperty.call(mappingProfile, orgCategory)) {
+    const categoryData = mappingProfile[orgCategory];
+    if (Object.prototype.hasOwnProperty.call(categoryData, requestKey)) {
+      return categoryData[requestKey];
+    }
+  }
+  return 'No matching data found.';
+}
+
 module.exports = {
   extractStringBetweenUnderscoreAndDash,
   extractThirdSegment,
@@ -606,4 +621,5 @@ module.exports = {
   validateActions,
   validateRuleOrder,
   validateCookiesEvent,
+  queryMapping,
 };
