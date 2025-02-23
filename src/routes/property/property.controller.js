@@ -21,6 +21,8 @@ async function httpGetDetailProperty(req, res) {
       propertyDetails.data.attributes.name,
     );
 
+    console.log(namedProperty, 24);
+
     // Retrieve the site code from the named property
     const propertySiteCode = siteCode.siteCode[namedProperty];
 

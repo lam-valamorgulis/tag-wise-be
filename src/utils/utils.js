@@ -1,16 +1,27 @@
 const { mappingProfile } = require('../data/mappingProfile');
 
 function extractStringBetweenUnderscoreAndDash(input) {
-  // Regular expression to match the string between _ and -
-  const regex = /_([^-]+)-/;
+  // Regular expression to capture two groups:
+  // Group 1: characters between "_" and "-"
+  // Group 2: characters immediately after "-" until a whitespace or "("
+  const regex = /_([^-]+)-([^\s(]+)/;
   const match = input.match(regex);
 
-  // If a match is found, return the captured group (the string between _ and -)
-  if (match && match[1]) {
-    return match[1].toLowerCase();
+  if (match && match[1] && match[2]) {
+    let code;
+    // If group2 (after dash) contains a dot, remove dots and use that
+    if (match[2].includes('.')) {
+      code = match[2].replace(/\./g, '');
+    } else {
+      // Otherwise, take group1.
+      // If group1 contains an underscore (e.g., "hybris_vn"), split and use the last part.
+      const parts = match[1].split('_');
+      code = parts[parts.length - 1];
+    }
+    return code.toLowerCase();
   }
 
-  // If no match is found, return null or an appropriate default value
+  // Return null if no valid match is found.
   return null;
 }
 
@@ -535,11 +546,11 @@ function validateCookiesEvent(components, isRequiredConsent) {
 
   return result;
 }
-
 function validateActions(components) {
   const result = {
     isImplementedByCustomCode: true,
     validComponents: [],
+    invalidComponents: [], // Added to store invalid components
     totalChecked: 0,
   };
 
@@ -596,6 +607,67 @@ function validateActions(components) {
 
   return result;
 }
+
+// function validateActions(components) {
+//   const result = {
+//     isImplementedByCustomCode: true,
+//     validComponents: [],
+//     totalChecked: 0,
+//   };
+
+//   // Filter only core::actions::custom-code components
+//   const customCodeComponents = components.filter(
+//     (component) =>
+//       component.attributes.delegate_descriptor_id ===
+//       'core::actions::custom-code',
+//   );
+
+//   if (customCodeComponents.length === 0) {
+//     result.isImplementedByCustomCode = false;
+//     return result;
+//   }
+
+//   const piiPatterns = [
+//     /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b/, // Email pattern
+//     /\b\d{10,15}\b/, // Phone numbers (basic digit-based, adjust as needed)
+//     /\b(sex|gender)\b/i, // Sex/Gender identifiers
+//   ];
+
+//   customCodeComponents.forEach((component) => {
+//     result.totalChecked += 1;
+
+//     try {
+//       const settings = JSON.parse(component.attributes.settings);
+//       const sourceCode = settings.source || '';
+
+//       const containsPII = piiPatterns.some((pattern) =>
+//         pattern.test(sourceCode),
+//       );
+
+//       if (containsPII) {
+//         result.invalidComponents.push({
+//           id: component.id,
+//           isValid: false,
+//           reason: 'Settings contain PII (email, phone, or gender-related info)',
+//         });
+//       } else {
+//         result.validComponents.push({
+//           id: component.id,
+//           isValid: true,
+//           reason: 'Valid custom code without PII',
+//         });
+//       }
+//     } catch (error) {
+//       result.invalidComponents.push({
+//         id: component.id,
+//         isValid: false,
+//         reason: 'Error parsing settings',
+//       });
+//     }
+//   });
+
+//   return result;
+// }
 
 // Function to query the mapping data
 

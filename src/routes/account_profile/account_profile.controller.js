@@ -8,13 +8,13 @@ const {
 
 async function httpAccountProfile(req, res) {
   try {
-    const { siteCode, subCode, isHq } = req.body;
-    console.log(siteCode, subCode, isHq);
+    const { siteCode, subsidinary, isHq } = req.body;
+    console.log(siteCode, subsidinary, isHq);
 
-    if (!siteCode || !subCode) {
+    if (!siteCode || !subsidinary) {
       return res.status(400).json({
         error: 'Missing required fields',
-        message: 'siteCode and subCode are required',
+        message: 'siteCode and subsidinary are required',
       });
     }
 
@@ -27,12 +27,14 @@ async function httpAccountProfile(req, res) {
     }
 
     // Await getReporterType because it is asynchronous
-    const reporterType = await getReporterType(subCode);
+    const reporterType = await getReporterType(subsidinary);
     console.log(`orgCategory: ${subType}, reporterType: ${reporterType}`);
 
-    // Determine which mapping to use based on isHq
+    // Determine which mapping to use based on isHq and subsidinary
     let mappingResult;
-    if (isHq) {
+    if (subsidinary === 'SEA HQ') {
+      mappingResult = '- Default user access\n- Requested R/S (subsidiaries)';
+    } else if (isHq) {
       mappingResult = queryMapping(subType, 'HQ');
     } else {
       mappingResult = queryMapping(subType, reporterType);
@@ -40,6 +42,7 @@ async function httpAccountProfile(req, res) {
 
     return res.status(200).json({
       orgCategory: subType,
+      reporterType,
       mapping: mappingResult,
     });
   } catch (error) {
