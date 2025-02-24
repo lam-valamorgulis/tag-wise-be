@@ -2,6 +2,8 @@ const http = require('http');
 
 require('dotenv').config({ path: './src/.env' });
 
+console.log('ADOBE_BASE_URL:', process.env.ADOBE_BASE_URL);
+
 const app = require('./app');
 const { mongoConnect } = require('./service/mongo');
 
