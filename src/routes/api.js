@@ -13,5 +13,6 @@ api.use('/property', propertyRouter);
 api.use('/rule', ruleRouter);
 api.use('/comments', commentRouter);
 api.use('/account_profile', accountProfileRouter);
+api.use('/test', accountProfileRouter);
 
 module.exports = api;
