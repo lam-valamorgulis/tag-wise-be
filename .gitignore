@@ -172,3 +172,7 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Ignore node_modules inside fe/ and be/
+tag-wise-fe/node_modules/
+tag-wise-be/node_modules/
