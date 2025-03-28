@@ -15,7 +15,6 @@ let adobeToken = null;
 let tokenExpiresAt = null;
 
 const refreshAdobeToken = async () => {
-  // console.log('Refreshing Adobe token...');
   try {
     const response = await axios.post(
       process.env.ADOBE_ACCESSTOKEN_URL,

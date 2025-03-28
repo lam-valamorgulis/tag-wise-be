@@ -3,6 +3,8 @@ const {
   getRulesLibraryAdobeApi,
   createAdobeLibraryApi,
   getLibraryByIdApi,
+  getLibraryExtention,
+  getLibraryDateElement,
 } = require('../../models/library.model');
 const { extractThirdSegment } = require('../../utils/utils');
 
@@ -142,8 +144,52 @@ async function httpLibrarySummary(req, res) {
   }
 }
 
+async function httpGetLibraryExtension(req, res) {
+  const libraryId = req.params.id;
+
+  try {
+    const libraryExtension = await getLibraryExtention(libraryId);
+
+    if (!libraryExtension) {
+      return res.status(404).json({
+        error: 'Library Extension is not found',
+      });
+    }
+
+    return res.status(200).json({ libraryExtension });
+  } catch (error) {
+    console.error('Error fetching library details:', error);
+    return res.status(500).json({
+      error: 'Internal server error',
+    });
+  }
+}
+
+async function httpGetLibraryDataElement(req, res) {
+  const libraryId = req.params.id;
+
+  try {
+    const libraryDataElement = await getLibraryDateElement(libraryId);
+
+    if (!libraryDataElement) {
+      return res.status(404).json({
+        error: 'Library Data Element is not found',
+      });
+    }
+
+    return res.status(200).json({ libraryDataElement });
+  } catch (error) {
+    console.error('Error fetching library details:', error);
+    return res.status(500).json({
+      error: 'Internal server error',
+    });
+  }
+}
+
 module.exports = {
   httpSearchLibrary,
   httpLibrarySummary,
   httpBulkCreateLibrary,
+  httpGetLibraryExtension,
+  httpGetLibraryDataElement,
 };

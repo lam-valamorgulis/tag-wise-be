@@ -2,12 +2,10 @@ const http = require('http');
 
 require('dotenv').config({ path: './src/.env' });
 
-console.log('ADOBE_BASE_URL:', process.env.ADOBE_BASE_URL);
-
 const app = require('./app');
 const { mongoConnect } = require('./service/mongo');
 
-const PORT = process.env.PORT || 8000; // Set your desired port here
+const PORT = process.env.PORT || 8000;
 
 const server = http.createServer(app);
 

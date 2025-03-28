@@ -1,48 +1,40 @@
 const mongoose = require('mongoose');
-const { orgMapping, mappingsData } = require('../data/orgMapping');
-const OrgMapping = require('../models/organization/orgMapping.mongo');
-const MappingReporter = require('../models/organization/reporterMapping.mongo');
-
 require('dotenv').config();
 
-// Update below to match your own MongoDB connection string.
-const { MONGO_URL } = process.env;
+const MONGO_URL = process.env.MONGO_URL || 'mongodb://localhost:27017/tagwise';
+
+// Remove deprecated options and add recommended ones
+const mongooseOptions = {
+  serverSelectionTimeoutMS: 5000, // Server selection timeout
+  socketTimeoutMS: 45000, // Socket timeout
+  family: 4, // Use IPv4, skip trying IPv6
+};
 
 mongoose.connection.once('open', () => {
-  console.log('MongoDB connection ready!');
+  console.log('MongoDB connection ready! Database:', mongoose.connection.name);
 });
 
 mongoose.connection.on('error', (err) => {
-  console.error(err);
+  console.error('MongoDB connection error:', err);
 });
+
 async function mongoConnect() {
   try {
-    await mongoose.connect(MONGO_URL);
-    console.log('MongoDB connection established successfully.');
-
-    const countOrg = await OrgMapping.countDocuments({});
-    if (countOrg === 0) {
-      await OrgMapping.insertMany(orgMapping);
-      console.log('Data inserted successfully.');
-    } else {
-      console.log('Data already exists. Skipping insertion.');
-    }
-
-    const countMappingReporter = await MappingReporter.countDocuments({});
-    if (countMappingReporter === 0) {
-      await MappingReporter.insertMany(mappingsData);
-      console.log('Data inserted successfully.');
-    } else {
-      console.log('Data already exists. Skipping insertion.');
-    }
+    await mongoose.connect(MONGO_URL, mongooseOptions);
   } catch (error) {
-    console.error('Error connecting to MongoDB or inserting data:', error);
+    console.error('Could not connect to MongoDB:', error);
     throw error;
   }
 }
 
 async function mongoDisconnect() {
-  await mongoose.disconnect();
+  try {
+    await mongoose.disconnect();
+    console.log('MongoDB disconnected');
+  } catch (error) {
+    console.error('Error disconnecting from MongoDB:', error);
+    throw error;
+  }
 }
 
 module.exports = {

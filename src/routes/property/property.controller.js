@@ -7,7 +7,6 @@ async function httpGetDetailProperty(req, res) {
   const propertyId = req.params.id;
 
   try {
-    // Simulate fetching data from a database or external service
     const propertyDetails = await getPropertyAdobeApi(propertyId);
 
     if (!propertyDetails) {
@@ -15,24 +14,27 @@ async function httpGetDetailProperty(req, res) {
         error: 'Property not found',
       });
     }
+    const nameProperty = propertyDetails.data.attributes.name;
 
-    // retrieve information about the property from the named property
-    const namedProperty = extractStringBetweenUnderscoreAndDash(
-      propertyDetails.data.attributes.name,
-    );
-
-    console.log(namedProperty, 24);
+    const namePropertySitecode =
+      extractStringBetweenUnderscoreAndDash(nameProperty) || '';
 
     // Retrieve the site code from the named property
-    const propertySiteCode = siteCode.siteCode[namedProperty];
+    const propertySiteCode = siteCode.siteCode[namePropertySitecode] || {};
+
+    // Add section based on nameProperty
+    const section = nameProperty.toLowerCase().includes('shop')
+      ? 'Shop'
+      : 'AEM';
+    propertySiteCode.section = section;
 
     // Return the property details
     return res.status(200).json({
-      propertyName: propertyDetails.data.attributes.name || '',
+      propertyName: nameProperty || '',
       propertySiteCode,
     });
   } catch (error) {
-    // console.error('Error fetching property details:', error);
+    console.error('Error in httpGetDetailProperty:', error);
     return res.status(500).json({
       error: 'Internal server error',
     });

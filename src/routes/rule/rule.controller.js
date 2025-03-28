@@ -1,23 +1,43 @@
 const {
   getRuleComponentsAdobeApi,
   getRulesLibraryAdobeApi,
+  getListRulesRevisonAdobeApi,
 } = require('../../models/rule.model');
+
 const {
-  validateRuleName,
-  validateDateRangeComponents,
-  validateCookieConditions,
-  validatePathContainKeyWords,
   validateWindowLoad,
-  validateActions,
-  validateRuleOrder,
-  validateCookiesEvent,
-} = require('../../utils/utils');
+  validateClicksComponent,
+  validateOtherComponents,
+} = require('./rule.event.helper');
+
+const { validateRuleName } = require('./rule.name.helper');
+
+const {
+  validateTrustArcConditions,
+  validateDateRangeComponents,
+  validatePathContainKeyWords,
+  validateRuleInProductionComponents,
+} = require('./rule.condition.helper');
+
+const { validateActions } = require('./rule.action.helper');
+
+const { categorizeRuleComponents } = require('../../utils/utils');
+
+const {
+  WINDOW_LOADED,
+  DATA_ELEMET_CHANGE,
+  CLICK_EVENT,
+  DATE_RANGE_CONDITION,
+  CUSTOM_CODE,
+  PATH_AND_QUERYSTRING,
+  PATH,
+  ACTION_CUSTOM_CODE,
+} = require('../../utils/constants');
 
 async function httpValidateRule(req, res) {
   const ruleId = req.params.ruleComponentId;
 
-  const { ruleName, isHqRules, isRequiredConsent, isShopSection, keyWord } =
-    req.body;
+  const { ruleName, isRequiredConsent, isShopSection, keyWords } = req.body;
 
   if (!ruleName) {
     return res.status(400).json({
@@ -25,11 +45,11 @@ async function httpValidateRule(req, res) {
     });
   }
 
-  // Check Name
+  // 1.Check Name
   const checkName = validateRuleName(ruleName);
 
   try {
-    // Simulate fetching data from a database or external service
+    // get list rules components
     const rulesLibrary = await getRuleComponentsAdobeApi(ruleId);
 
     if (!rulesLibrary) {
@@ -38,49 +58,94 @@ async function httpValidateRule(req, res) {
       });
     }
 
-    // Check Events
+    // Categorize the components
+    const categorizedComponents = categorizeRuleComponents(rulesLibrary.data);
+
+    // 2.Check Events
+    //  a.check window loading
+    const windowLoadComponents = categorizedComponents.events.filter(
+      (component) =>
+        component.attributes.delegate_descriptor_id === WINDOW_LOADED,
+    );
+    const dataElementComponents = categorizedComponents.events.filter(
+      (component) =>
+        component.attributes.delegate_descriptor_id === DATA_ELEMET_CHANGE,
+    );
+
     const checkWindowLoad = validateWindowLoad(
-      rulesLibrary.data,
+      windowLoadComponents,
       isShopSection,
+      dataElementComponents,
     );
 
-    const checkRuleOrder = validateRuleOrder(rulesLibrary.data, isHqRules);
+    // b.check click
+    const clickComponents = categorizedComponents.events.filter(
+      (component) =>
+        component.attributes.delegate_descriptor_id === CLICK_EVENT,
+    );
+    const checkClicks = validateClicksComponent(clickComponents);
 
-    const checkCookiesEvent = validateCookiesEvent(
-      rulesLibrary.data,
+    // c.check other events
+    const EXCLUDED_EVENTS = [WINDOW_LOADED, DATA_ELEMET_CHANGE, CLICK_EVENT];
+    const otherComponents = categorizedComponents.events.filter(
+      (component) =>
+        !EXCLUDED_EVENTS.includes(component.attributes.delegate_descriptor_id),
+    );
+    const checkOtherEvents = validateOtherComponents(otherComponents);
+
+    // 3.Check conditions
+    // a. check date ranges
+    const dateRangeComponents = categorizedComponents.conditions.filter(
+      (component) =>
+        component.attributes.delegate_descriptor_id === DATE_RANGE_CONDITION,
+    );
+    const checkDateRange = validateDateRangeComponents(dateRangeComponents);
+
+    // b.check current date of rules in production
+    const checkDateRuleInProduction =
+      validateRuleInProductionComponents(ruleId);
+
+    // c. check trust arc conditions
+    const trustArcComponents = categorizedComponents.conditions.filter(
+      (component) =>
+        component.attributes.delegate_descriptor_id === CUSTOM_CODE,
+    );
+    const checkTrustArcCondition = validateTrustArcConditions(
+      trustArcComponents,
       isRequiredConsent,
     );
 
-    // Check conditions
-    const checkDateRange = validateDateRangeComponents(
-      rulesLibrary.data,
-      isHqRules,
+    // d. check path string
+    const pathStringComponents = categorizedComponents.conditions.filter(
+      (component) =>
+        component.attributes.delegate_descriptor_id === PATH_AND_QUERYSTRING ||
+        component.attributes.delegate_descriptor_id === PATH,
     );
-
     const checkPathString = validatePathContainKeyWords(
-      rulesLibrary.data,
-      keyWord,
-    );
-
-    const checkCookiesCondition = validateCookieConditions(
-      rulesLibrary.data,
-      isRequiredConsent,
+      pathStringComponents,
+      keyWords,
     );
 
     // check actions
-    const checkActions = validateActions(rulesLibrary.data);
+    const actionCodeComponents = categorizedComponents.actions.filter(
+      (component) =>
+        component.attributes.delegate_descriptor_id === ACTION_CUSTOM_CODE,
+    );
+    console.log('actionCodeComponents', actionCodeComponents);
+    const checkActions = validateActions(actionCodeComponents, keyWords);
 
     return res.status(200).json({
       checkName: checkName,
       checkEvents: {
         checkWindowLoad,
-        checkRuleOrder,
-        checkCookiesEvent,
+        checkClicks,
+        checkOtherEvents,
       },
       checkCondition: {
         checkDateRange,
+        checkDateRuleInProduction,
+        checkTrustArcCondition,
         checkPathString,
-        checkCookiesCondition,
       },
       checkActions: {
         checkActions,
@@ -111,6 +176,8 @@ async function httpGetListRule(req, res) {
       const ruleItem = {};
       ruleItem.name = rule.attributes.name;
       ruleItem.id = rule.id;
+      ruleItem.enable = rule.attributes.enabled;
+      ruleItem.revision_number = rule.attributes.revision_number;
       rulesList.push(ruleItem);
     });
 
@@ -123,4 +190,24 @@ async function httpGetListRule(req, res) {
   }
 }
 
-module.exports = { httpValidateRule, httpGetListRule };
+async function httpGetRuleInProduction(req, res) {
+  const ruleId = req.params.ruleComponentId;
+
+  try {
+    const rulesInProduction = await getListRulesRevisonAdobeApi(ruleId);
+
+    if (!rulesInProduction) {
+      return res.status(404).json({
+        error: 'Library not found',
+      });
+    }
+
+    return res.status(200).json(rulesInProduction);
+  } catch (error) {
+    console.error('Error fetching library details:', error);
+    return res.status(500).json({
+      error: 'Internal server error',
+    });
+  }
+}
+module.exports = { httpValidateRule, httpGetListRule, httpGetRuleInProduction };
