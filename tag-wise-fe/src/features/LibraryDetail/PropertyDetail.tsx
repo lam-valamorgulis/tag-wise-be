@@ -1,5 +1,5 @@
 import { Col, Row } from "antd";
-import type { Property } from "./useProperty";
+import type { Property } from "./hooks/useProperty";
 
 function Property({ property }: { property: Property }) {
   if (!property?.propertySiteCode) {

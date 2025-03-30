@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
-import { apiDetailProperty } from "../../utils/axios";
+import { apiDetailProperty } from "../../../utils/axios";
 
 export type PropertyDetail = {
   country: string;
@@ -9,6 +9,7 @@ export type PropertyDetail = {
   rhq: string;
   subHq: string;
   url: string;
+  section: string;
 };
 
 export type Property = {

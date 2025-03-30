@@ -1,14 +1,16 @@
-import ValidationResults, { ValidationData } from "./ValidationResults";
+import { RuleValidationResult } from "./type";
+import ValidationResults from "./ValidationResults";
 
 interface RuleValidationDetailProps {
-  ruleValidationResult: ValidationData;
+  ruleValidationResult: RuleValidationResult | string;
 }
 
 function RuleValidationDetail({
   ruleValidationResult,
 }: RuleValidationDetailProps) {
-  if (typeof ruleValidationResult == "string")
+  if (typeof ruleValidationResult === "string") {
     return <p>Click Validate to audit rule</p>;
+  }
 
   return (
     <>

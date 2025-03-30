@@ -1,113 +1,232 @@
-// comment.controller.js
-const Comment = require('../../models/commenTemplate/comment.mongo');
+/* eslint-disable arrow-body-style */
+/* eslint-disable radix */
+const {
+  commentRepository,
+  CommentError,
+} = require('../../models/commentTemplate/comment.model');
 
+// Constants
+const VALID_CATEGORIES = [
+  '3rd Party Tag',
+  'Account Creation',
+  'Maintenance',
+  'Enhancement',
+  'General',
+];
+
+const VALID_SORT_FIELDS = ['createdAt', 'updatedAt', 'category', 'purpose'];
+
+// Validation helpers
+const validateCategory = (category) => {
+  if (!category) {
+    throw new CommentError('Category is required', 400);
+  }
+  if (!VALID_CATEGORIES.includes(category)) {
+    throw new CommentError('Invalid category', 400);
+  }
+};
+
+const validatePagination = (page, limit) => ({
+  page: Math.max(1, parseInt(page)),
+  limit: Math.min(100, Math.max(1, parseInt(limit))),
+});
+
+const validateSortField = (sortBy) => {
+  if (sortBy && !VALID_SORT_FIELDS.includes(sortBy)) {
+    throw new CommentError('Invalid sort field', 400);
+  }
+};
+
+// Response helpers
+const handleError = (res, error, defaultMessage) => {
+  console.error(`${error.name || 'Error'}: ${error.message}`);
+  return res.status(error.statusCode || 500).json({
+    success: false,
+    error: error.message || defaultMessage,
+  });
+};
+
+const sendResponse = (res, data, statusCode = 200) => {
+  return res.status(statusCode).json({
+    success: true,
+    data,
+  });
+};
+
+// Controller functions
 async function httpGetAllComments(req, res) {
   try {
-    // Decode URL-encoded parameters
-    const category = req.query.category
-      ? decodeURIComponent(req.query.category)
-      : undefined;
-    const hashtag = req.query.hashtag
-      ? decodeURIComponent(req.query.hashtag)
-      : undefined;
+    const {
+      category,
+      search: searchTerm,
+      sortBy = 'createdAt',
+      order = 'desc',
+      page = 1,
+      limit = 10,
+    } = req.query;
 
-    const filter = {};
-    if (category) filter.category = category;
-    if (hashtag) filter.hashtag = hashtag;
+    validateSortField(sortBy);
+    if (category) validateCategory(category);
+    const pagination = validatePagination(page, limit);
 
-    const comments = await Comment.find(filter).lean();
-    return res.status(200).json(comments);
-  } catch (error) {
-    return res.status(500).json({
-      error: 'Failed to fetch comments',
-      message: error.message,
+    const result = await commentRepository.findAll({
+      category,
+      searchTerm,
+      sortBy,
+      order,
+      ...pagination,
     });
+
+    return sendResponse(res, result);
+  } catch (error) {
+    return handleError(res, error, 'Failed to fetch comments');
   }
 }
 
 async function httpAddComment(req, res) {
   try {
-    const { category, purpose, commentDetail, hashtag } = req.body;
+    const { category, purpose, comment, createdBy } = req.body;
 
-    if (!category || !purpose || !commentDetail) {
-      return res.status(400).json({
-        error: 'Missing required fields',
-        message: 'Category, purpose, and comment detail are required',
-      });
+    if (!category || !purpose || !comment || !createdBy) {
+      throw new CommentError('Missing required fields', 400);
     }
 
-    const newComment = new Comment({
+    validateCategory(category);
+
+    const newComment = await commentRepository.create({
       category,
       purpose,
-      commentDetail,
-      hashtag: hashtag || '',
+      comment,
+      createdBy,
     });
 
-    const savedComment = await newComment.save();
-    return res.status(201).json(savedComment);
+    return sendResponse(res, newComment, 201);
   } catch (error) {
-    return res.status(400).json({
-      error: 'Comment creation failed',
-      message: error.message,
-    });
+    return handleError(res, error, 'Failed to add comment');
   }
 }
 
 async function httpUpdateComment(req, res) {
   try {
-    const commentId = req.params.id;
-    const { category, purpose, commentDetail, hashtag } = req.body;
-
-    if (!category || !purpose || !commentDetail) {
-      return res.status(400).json({
-        error: 'Missing required fields',
-        message: 'Category, purpose, and comment detail are required',
-      });
+    const { id } = req.params;
+    if (!id) {
+      throw new CommentError('Comment ID is required', 400);
     }
 
-    const updatedComment = await Comment.findByIdAndUpdate(
-      commentId,
-      { category, purpose, commentDetail, hashtag },
-      { new: true, runValidators: true },
-    );
+    const updateData = {
+      ...req.body,
+      updatedAt: new Date(),
+    };
 
-    if (!updatedComment) {
-      return res.status(404).json({
-        error: 'Comment not found',
-        message: 'No comment found with that ID',
-      });
+    if (updateData.category) {
+      validateCategory(updateData.category);
     }
 
-    return res.status(200).json(updatedComment);
+    const updatedComment = await commentRepository.updateById(id, updateData);
+    return sendResponse(res, updatedComment);
   } catch (error) {
-    return res.status(400).json({
-      error: 'Comment update failed',
-      message: error.message,
-    });
+    return handleError(res, error, 'Failed to update comment');
   }
 }
 
 async function httpDeleteComment(req, res) {
   try {
-    const commentId = req.params.id;
-    const deletedComment = await Comment.findByIdAndDelete(commentId);
-
-    if (!deletedComment) {
-      return res.status(404).json({
-        error: 'Comment not found',
-        message: 'No comment found with that ID',
-      });
+    const { id } = req.params;
+    if (!id) {
+      throw new CommentError('Comment ID is required', 400);
     }
 
-    return res.status(200).json({
-      message: 'Comment deleted successfully',
-      deletedComment,
-    });
+    const result = await commentRepository.deleteById(id);
+    return sendResponse(res, result);
   } catch (error) {
-    return res.status(400).json({
-      error: 'Comment deletion failed',
-      message: error.message,
+    return handleError(res, error, 'Failed to delete comment');
+  }
+}
+
+async function httpSearchComments(req, res) {
+  try {
+    const { searchTerm: encodedSearchTerm, page = 1, limit = 10 } = req.query;
+
+    if (!encodedSearchTerm) {
+      throw new CommentError('Search term is required', 400);
+    }
+
+    // Decode the search term
+    const searchTerm = decodeURIComponent(encodedSearchTerm);
+
+    const pagination = validatePagination(page, limit);
+    const result = await commentRepository.search(
+      searchTerm,
+      pagination.page,
+      pagination.limit,
+    );
+
+    return sendResponse(res, result);
+  } catch (error) {
+    return handleError(res, error, 'Failed to search comments');
+  }
+}
+
+// Add this to your controller file
+
+async function httpSearchWithFilters(req, res) {
+  try {
+    const {
+      category,
+      searchTerm,
+      sortBy = 'createdAt',
+      order = 'desc',
+      page = 1,
+      limit = 10,
+    } = req.query;
+
+    // Decode URL-encoded parameters
+    const decodedCategory = category ? decodeURIComponent(category) : null;
+    const decodedSearchTerm = searchTerm
+      ? decodeURIComponent(searchTerm)
+      : null;
+
+    // Validate category if provided
+    if (decodedCategory) {
+      validateCategory(decodedCategory);
+    }
+
+    validateSortField(sortBy);
+    const pagination = validatePagination(page, limit);
+
+    const result = await commentRepository.searchWithFilters({
+      category: decodedCategory,
+      searchTerm: decodedSearchTerm,
+      sortBy,
+      order,
+      ...pagination,
     });
+
+    return sendResponse(res, result);
+  } catch (error) {
+    return handleError(res, error, 'Failed to search comments');
+  }
+}
+
+async function httpGetCommentsByCategory(req, res) {
+  try {
+    const { category: encodedCategory, page = 1, limit = 10 } = req.query;
+
+    // Decode the category parameter
+    const category = decodeURIComponent(encodedCategory);
+
+    validateCategory(category);
+    const pagination = validatePagination(page, limit);
+
+    const result = await commentRepository.findByCategory(
+      category,
+      pagination.page,
+      pagination.limit,
+    );
+
+    return sendResponse(res, result);
+  } catch (error) {
+    return handleError(res, error, 'Failed to fetch comments by category');
   }
 }
 
@@ -116,4 +235,7 @@ module.exports = {
   httpAddComment,
   httpUpdateComment,
   httpDeleteComment,
+  httpSearchComments,
+  httpGetCommentsByCategory,
+  httpSearchWithFilters,
 };

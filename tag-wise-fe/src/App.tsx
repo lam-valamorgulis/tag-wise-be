@@ -7,7 +7,6 @@ import CommonLayout from "./components/CommonLayout";
 import Loading from "./components/Loading";
 import Logout from "./components/Logout";
 import LibraryDetail from "./features/LibraryDetail/LibraryDetail";
-import AdobeCreateProfilePage from "./pages/AdobeCreateProfilePage";
 import CommentsPage from "./pages/CommentsPage";
 import Dashboard from "./pages/Dashboard";
 import HomePage from "./pages/HomePage";
@@ -45,7 +44,6 @@ function App() {
           <Route path="checklist" element={<TagChecklistPage />} />
           <Route path="comments" element={<CommentsPage />} />
           <Route path="hqrules" element={<HqRulePage />} />
-          <Route path="account_profile" element={<AdobeCreateProfilePage />} />
         </Route>
 
         <Route path="/logout" element={<Logout />} />

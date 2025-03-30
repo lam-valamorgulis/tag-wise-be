@@ -116,11 +116,6 @@ const copyToClipboard = (data: any[]) => {
   });
 };
 
-// const copyToClipboard = (data: any[]) => {
-//   const text = data.map((row) => `${row.item}: ${row.result}`).join("\n");
-//   navigator.clipboard.writeText(text);
-// };
-
 const TagChecklist = () => {
   return (
     <Row gutter={16}>

@@ -1,4 +1,4 @@
-const commentRepository = require('../models/commenTemplate/comment.model');
+const commentRepository = require('../models/commentTemplate/comment.model');
 
 const getAllComments = async (req, res) => {
   try {

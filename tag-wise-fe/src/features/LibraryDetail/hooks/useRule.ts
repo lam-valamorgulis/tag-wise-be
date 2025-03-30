@@ -1,13 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
-import { apiRuleList } from "../../utils/axios";
-
-type RuleItem = {
-  id: string;
-  name: string;
-};
-
-export type RuleList = RuleItem[];
+import { apiRuleList } from "../../../utils/axios";
+import { RuleList } from "../type";
 
 export default function useRule() {
   const { libraryId } = useParams<{
@@ -15,8 +9,8 @@ export default function useRule() {
   }>();
 
   const {
-    data: ruleList,
-    isLoading: isRuleListLoading,
+    data: rulesList,
+    isLoading: isLoadingRules,
     error: ruleListError,
   } = useQuery<RuleList, Error>({
     queryKey: ["ruleList", libraryId],
@@ -25,8 +19,8 @@ export default function useRule() {
   });
 
   return {
-    ruleList,
-    isRuleListLoading,
+    rulesList,
+    isLoadingRules,
     ruleListError,
   };
 }

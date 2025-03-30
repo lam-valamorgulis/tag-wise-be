@@ -1,113 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
-
-export interface ValidationData {
-  checkName?: {
-    isValid?: boolean;
-    components?: {
-      userType?: string;
-      siteSection?: string;
-      purpose?: string;
-      trackingPage?: string;
-      trackingFeature?: string;
-    };
-    valideName?: {
-      userType?: string;
-      siteSection?: string;
-      purpose?: string;
-      trackingPage?: string;
-      trackingFeature?: string;
-    };
-  };
-  checkEvents?: {
-    checkWindowLoad?: {
-      isRuleContainWL?: boolean;
-      eventComponents?: string[];
-      invalidComponents?: {
-        isValid?: boolean;
-        reason?: string;
-      }[];
-      validComponents?: {
-        isValid?: boolean;
-        reason?: string;
-      }[];
-      totalChecked?: number;
-    };
-    checkRuleOrder?: {
-      checkComponents?: {
-        isValid?: boolean;
-        reason?: string;
-      }[];
-      totalChecked?: number;
-    };
-    checkCookiesEvent?: {
-      eventComponents?: string[];
-      validatedComponents?: {
-        isValid?: boolean;
-        reason?: string;
-      }[];
-      totalChecked?: number;
-    };
-  };
-  checkCondition?: {
-    checkDateRange?: {
-      isContainDateRange?: boolean;
-      validComponents?: {
-        id?: string;
-        isContainDateRange?: boolean;
-        name?: string;
-        endDate?: string;
-        isValid?: boolean;
-        maxAllowedDate?: string;
-        reason?: string;
-      }[];
-      invalidComponents?: any[];
-      totalChecked?: number;
-    };
-    checkPathString?: {
-      isContainQueryPath?: boolean;
-      conditionElement?: string[];
-      validComponents?: any[];
-      invalidComponents?: any[];
-      totalChecked?: number;
-      bypassedComponents?: {
-        isValid?: boolean;
-        reason?: string;
-      }[];
-    };
-    checkCookiesCondition?: {
-      validComponents?: any[];
-      invalidComponents?: {
-        isValid?: boolean;
-        reason?: string;
-      }[];
-      bypassedComponents?: any[];
-      totalChecked?: number;
-    };
-  };
-  checkActions?: {
-    checkActions?: {
-      isImplementedByCustomCode?: boolean;
-      validComponents?: {
-        id?: string;
-        isValid?: boolean;
-        reason?: string;
-      }[];
-      totalChecked?: number;
-    };
-  };
-}
+import { useGeneralInformation } from "../../context/GeneralInformationProvider";
+import { RuleValidationResult } from "./type";
 
 interface ValidationResultsProps {
-  ruleValidationResult?: ValidationData;
+  ruleValidationResult: RuleValidationResult;
 }
 
 const ValidationResults: React.FC<ValidationResultsProps> = ({
   ruleValidationResult,
 }) => {
   const { checkName, checkEvents, checkCondition, checkActions } =
-    ruleValidationResult ?? {};
+    ruleValidationResult;
+  const { options } = useGeneralInformation();
 
   // Common styles
   const containerStyle: React.CSSProperties = {
@@ -146,13 +51,14 @@ const ValidationResults: React.FC<ValidationResultsProps> = ({
     wordBreak: "break-word",
   };
 
+  // Styles (update testItemStyle)
   const testItemStyle: React.CSSProperties = {
     display: "flex",
     justifyContent: "space-between",
-    alignItems: "flex-start",
+    alignItems: "center", // Changed from "flex-start" to "center" for vertical centering
     gap: "8px",
     width: "100%",
-    margin: "3px 0",
+    margin: "6px 0",
   };
 
   const subHeaderStyle: React.CSSProperties = {
@@ -164,6 +70,7 @@ const ValidationResults: React.FC<ValidationResultsProps> = ({
   };
 
   const listItemStyle: React.CSSProperties = {
+    color: "#090", // Always green for strings
     marginLeft: "10px",
     listStyleType: "none",
   };
@@ -178,17 +85,61 @@ const ValidationResults: React.FC<ValidationResultsProps> = ({
         whiteSpace: "nowrap",
       }}
     >
-      {isValid ? "✓ PASS" : "✗ FAIL"}
+      {isValid ? "✓ YES" : "✗ NO"}
     </span>
   );
+  const renderMatchString = (strings?: string[], inValidValues?: string[]) => {
+    if (!strings || !Array.isArray(strings)) return <span>N/A</span>;
+
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+        {strings.map((str, index) => (
+          <span
+            key={index}
+            style={{
+              color: !inValidValues?.includes(str) ? "#090" : "#900",
+              marginLeft: "4px",
+              fontSize: "10px",
+              fontFamily: "monospace",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {str}
+          </span>
+        ))}
+      </div>
+    );
+  };
+
+  // Function to render a number with conditional color
+  const renderNumber = (items: number | undefined | string) => {
+    if (items === undefined) return "";
+    if (typeof items !== "number") return "";
+
+    // Determine the color based on the value
+    const color = items < 50 ? "#900" : "#090";
+
+    return (
+      <li
+        style={{
+          ...listItemStyle,
+          color, // Apply conditional color for numbers
+        }}
+      >
+        {items.toString()}
+      </li>
+    );
+  };
 
   const renderList = (items: string[] | undefined) => {
-    if (!items || items.length === 0) return "N/A";
+    if (!items) return "";
+    if (!Array.isArray(items) || items.length === 0) return "";
+
     return (
       <ul style={{ paddingLeft: "10px", margin: "0" }}>
         {items.map((item, index) => (
           <li key={index} style={listItemStyle}>
-            . {item}
+            {item}
           </li>
         ))}
       </ul>
@@ -202,155 +153,206 @@ const ValidationResults: React.FC<ValidationResultsProps> = ({
         <h3 style={sectionTitleStyle}>I. Check Name</h3>
         <div style={testCaseStyle}>
           <div style={testItemStyle}>
-            <span>• Rule Name start with (LC):</span>
+            <span className="ml-2">• Rule Name start with (LC):</span>
             {renderStatus(checkName?.valideName?.userType === "pass")}
           </div>
           <div style={testItemStyle}>
-            <span>
+            <span className="ml-2">
               • Site Section contains{" "}
               {checkName?.components?.siteSection ?? "N/A"}:
             </span>
             {renderStatus(checkName?.valideName?.siteSection === "pass")}
           </div>
-          <div>• Purpose: {checkName?.components?.purpose ?? "N/A"}</div>
-          <div>
-            • Tracking Page: {checkName?.components?.trackingPage ?? "N/A"}
+          <div style={testItemStyle}>
+            <span className="ml-2">• Purpose</span>
+            {renderList([checkName?.components?.purpose ?? ""])}
           </div>
-          <div>
-            • Tracking Feature:{" "}
-            {checkName?.components?.trackingFeature ?? "N/A"}
+          <div style={testItemStyle}>
+            <span className="ml-2">• Tracking Page</span>
+            {renderList([checkName?.components?.trackingPage ?? ""])}
+          </div>
+          <div style={testItemStyle}>
+            <span className="ml-2">• Tracking Feature</span>
+            {renderList([checkName?.components?.trackingFeature ?? ""])}
           </div>
         </div>
       </div>
 
       {/* Column 2: Check Events */}
+      {/* WL */}
       <div style={sectionStyle}>
-        <h3 style={sectionTitleStyle}>II. Check Events</h3>
+        <h3 style={sectionTitleStyle}>II.Check Events</h3>
         <div style={testCaseStyle}>
-          <h4 style={subHeaderStyle}>a. Check Window Load</h4>
           <div style={testItemStyle}>
-            <span>• Rules contains WL:</span>
-            {renderStatus(checkEvents?.checkWindowLoad?.isRuleContainWL)}
+            <h4 style={subHeaderStyle}>a. Rules contain Window Load :</h4>
+            {renderStatus(checkEvents?.checkWindowLoad?.isContainedWL)}
           </div>
-          <div>
-            • Events:
-            {renderList(checkEvents?.checkWindowLoad?.eventComponents)}
-          </div>
-
-          <h4 style={subHeaderStyle}>b. Check Data Element Change</h4>
-          {checkEvents?.checkWindowLoad?.invalidComponents?.map((comp, i) => (
-            <div style={testItemStyle} key={i}>
-              <span>• {comp?.reason ?? "No reason provided"}</span>
-              {renderStatus(comp?.isValid)}
-            </div>
-          ))}
-
-          {checkEvents?.checkWindowLoad?.validComponents?.map((comp, i) => (
-            <div style={testItemStyle} key={i}>
-              <span>• {comp?.reason ?? "No reason provided"}</span>
-              {renderStatus(comp?.isValid)}
-            </div>
-          ))}
-
-          <h4 style={subHeaderStyle}>c. Check Rule Order</h4>
           <div style={testItemStyle}>
-            <span>• All is greater than 50:</span>
-            {renderStatus(
-              checkEvents?.checkRuleOrder?.checkComponents?.[0]?.isValid
-            )}
+            <span className="ml-2">• Extensions</span>
+            {renderList(checkEvents?.checkWindowLoad?.extensions)}
+          </div>
+          <div style={testItemStyle}>
+            <span className="ml-2">• Types</span>
+            {renderList(checkEvents?.checkWindowLoad?.type)}
+          </div>
+          <div style={testItemStyle}>
+            <span className="ml-2">• Rules Order</span>
+            {renderNumber(checkEvents?.checkWindowLoad?.order)}
           </div>
 
-          <h4 style={subHeaderStyle}>d. Check Consent Mode</h4>
           <div style={testItemStyle}>
-            <span>
-              •{" "}
-              {checkEvents?.checkCookiesEvent?.validatedComponents?.[0]
-                ?.reason ?? "No reason provided"}
-            </span>
-            {renderStatus(
-              checkEvents?.checkCookiesEvent?.validatedComponents?.[0]?.isValid
-            )}
+            <span className="ml-2">• Data Elements Change Included</span>
+            {options.isShopSection
+              ? renderStatus(
+                  checkEvents?.checkWindowLoad?.isDataElementIncluded.isInclude
+                )
+              : ""}
           </div>
-          <div>
-            • Events:
-            {renderList(checkEvents?.checkCookiesEvent?.eventComponents)}
+        </div>
+
+        {/* click */}
+        <div style={testCaseStyle}>
+          <div style={testItemStyle}>
+            <h4 style={subHeaderStyle}>a. Rules contain Click :</h4>
+            {renderStatus(checkEvents?.checkClicks?.isContainedClick)}
+          </div>
+          <div style={testItemStyle}>
+            <span className="ml-2">• Extensions</span>
+            {checkEvents?.checkClicks?.isContainedClick &&
+              renderList(checkEvents?.checkClicks?.extensions)}
+          </div>
+          <div style={testItemStyle}>
+            <span className="ml-2">• Types</span>
+            {checkEvents?.checkClicks?.isContainedClick &&
+              renderList(checkEvents?.checkClicks?.type)}
+          </div>
+          <div style={testItemStyle}>
+            <span className="ml-2">• Rules Order</span>
+            {checkEvents?.checkClicks?.isContainedClick &&
+              renderNumber(checkEvents?.checkClicks?.order)}
+          </div>
+
+          <div style={testItemStyle}>
+            <span className="ml-2">• Data Elements Change Included</span>
+            {checkEvents?.checkClicks?.isContainedClick &&
+              renderStatus(checkEvents?.checkClicks?.delayNavigation)}
+          </div>
+        </div>
+
+        {/* other */}
+        <div style={testCaseStyle}>
+          <div style={testItemStyle}>
+            <h4 style={subHeaderStyle}>c. Others </h4>
+            {renderStatus(checkEvents?.checkOtherEvents?.isContainedOther)}
+          </div>
+          <div style={testItemStyle}>
+            <span className="ml-2">• Extensions</span>
+            {checkEvents?.checkOtherEvents?.isContainedOther &&
+              renderList(checkEvents?.checkOtherEvents?.extensions)}
+          </div>
+          <div style={testItemStyle}>
+            <span className="ml-2">• Types</span>
+            {checkEvents?.checkOtherEvents?.isContainedOther &&
+              renderMatchString(checkEvents?.checkOtherEvents?.type, [
+                "dom-ready",
+                "page-bottom",
+                "library-loaded",
+              ])}
+          </div>
+          <div style={testItemStyle}>
+            <span className="ml-2">• Rules Order</span>
+            {checkEvents?.checkOtherEvents?.isContainedOther &&
+              renderNumber(checkEvents?.checkOtherEvents?.order)}
           </div>
         </div>
       </div>
 
       {/* Column 3: Check Conditions */}
       <div style={sectionStyle}>
-        <h3 style={sectionTitleStyle}>III. Check Conditions</h3>
+        <h3 style={sectionTitleStyle}>II. Check Conditions </h3>
         <div style={testCaseStyle}>
-          <h4 style={subHeaderStyle}>a. Check Date Range</h4>
           <div style={testItemStyle}>
-            <span>• Is Rule contains a date range</span>
-            {renderStatus(checkCondition?.checkDateRange?.isContainDateRange)}
+            <h4 style={subHeaderStyle}>a. Rules contain Date Range </h4>
+            {renderStatus(
+              checkCondition?.checkDateRange?.isContainedDateRangeComponent
+            )}
           </div>
-          {checkCondition?.checkDateRange?.validComponents?.map((comp, i) => (
-            <div key={i}>
-              <div style={testItemStyle}>
-                <span>• {comp?.reason ?? "No reason provided"}</span>
-                {renderStatus(comp?.isValid)}
-              </div>
-              <div style={testItemStyle}>
-                <span>• Rule will end before: </span>
-                {comp?.endDate
-                  ? new Date(comp.endDate).toLocaleDateString()
-                  : "N/A"}
-              </div>
-              <div style={testItemStyle}>
-                <span>• Max date range allowed: </span>
-                {comp?.maxAllowedDate
-                  ? new Date(comp.maxAllowedDate).toLocaleDateString()
-                  : "N/A"}
-              </div>
-            </div>
-          ))}
-
-          {checkCondition?.checkDateRange?.invalidComponents?.map((comp, i) => (
-            <div style={testItemStyle} key={i}>
-              <span style={{ color: "#900" }}>
-                • {comp?.reason ?? "No reason provided"}
-              </span>
-              {renderStatus(comp?.isValid)}
-            </div>
-          ))}
-
-          <h4 style={subHeaderStyle}>b. Check Path & Query String</h4>
           <div style={testItemStyle}>
-            <span>• Is Rule contains Condition a path and query string:</span>
-            {renderStatus(checkCondition?.checkPathString?.isContainQueryPath)}
+            <span className="ml-2">• Implemented by Core Extension</span>
+            {checkCondition?.checkDateRange?.isContainedDateRangeComponent &&
+              renderList(checkCondition?.checkDateRange?.extensions)}
           </div>
-          <div>
-            • Condition:
-            {renderList(checkCondition?.checkPathString?.conditionElement)}
+          <div style={testItemStyle}>
+            <span className="ml-2">• Types</span>
+            {checkCondition?.checkDateRange?.isContainedDateRangeComponent &&
+              renderList(checkCondition?.checkDateRange?.type)}
+          </div>
+          <div style={testItemStyle}>
+            <span className="ml-6" style={sectionTitleStyle}>
+              End date is within the allowed range :
+            </span>
+            {checkCondition?.checkDateRange?.isContainedDateRangeComponent &&
+              renderStatus(checkCondition?.checkDateRange?.settings.isValid)}
+          </div>
+          <div style={testItemStyle}>
+            <span className="ml-2">• Current End Date</span>
+            {checkCondition?.checkDateRange?.isContainedDateRangeComponent &&
+              renderList(
+                checkCondition?.checkDateRuleInProduction
+                  ?.currentEndDateInProduction
+              )}
           </div>
 
-          {checkCondition?.checkPathString?.validComponents?.map((comp, i) => (
-            <div style={testItemStyle} key={i}>
-              <span>• {comp?.reason ?? "No reason provided"}</span>
-              {renderStatus(comp?.isValid)}
-            </div>
-          ))}
+          <div style={testItemStyle}>
+            <span className="ml-2">• Max date range allowed</span>
+            {checkCondition?.checkDateRange?.isContainedDateRangeComponent &&
+              renderList(
+                checkCondition?.checkDateRange?.settings.maxAllowedDate
+              )}
+          </div>
+          <div style={testItemStyle}>
+            <span className="ml-2">• Expected End Date</span>
+            {checkCondition?.checkDateRange?.isContainedDateRangeComponent &&
+              renderList(
+                checkCondition?.checkDateRange?.settings.expectedEndDate
+              )}
+          </div>
+        </div>
 
-          {checkCondition?.checkPathString?.bypassedComponents?.map(
-            (comp, i) => (
-              <div style={testItemStyle} key={i}>
-                <span>• {comp?.reason ?? "No reason provided"}</span>
-                {renderStatus(comp?.isValid)}
-              </div>
-            )
-          )}
-
-          {checkCondition?.checkPathString?.invalidComponents?.map(
-            (comp, i) => (
-              <div style={{ ...testItemStyle, color: "#900" }} key={i}>
-                <span>• {comp?.reason ?? "No reason provided"}</span>
-                {renderStatus(comp?.isValid)}
-              </div>
-            )
-          )}
+        {/* check trustArc */}
+        <div style={testCaseStyle}>
+          <div style={testItemStyle}>
+            <h4 style={subHeaderStyle}>b. EU consent </h4>
+          </div>
+          <div style={testItemStyle}>
+            <span className="ml-2">• TrustArc is included</span>
+            {!checkCondition?.checkTrustArcCondition?.byPass &&
+              renderStatus(
+                checkCondition?.checkTrustArcCondition?.isContainedTrustArc
+              )}
+          </div>
+        </div>
+        {/* check path */}
+        <div style={testCaseStyle}>
+          <div style={testItemStyle}>
+            <h4 style={subHeaderStyle}>c. Check Path & Query String </h4>
+            {renderStatus(checkCondition?.checkPathString?.isContainPathQuery)}
+          </div>
+          <div style={testItemStyle}>
+            <span className="ml-2">• Keyword is not included</span>
+            {checkCondition?.checkPathString?.isContainPathQuery &&
+              renderStatus(
+                checkCondition?.checkPathString?.settings?.inValidQuery.length >
+                  0
+              )}
+          </div>
+          <div style={testItemStyle}>
+            <span className="ml-2">• InValid Keyword</span>
+            {checkCondition?.checkPathString?.isContainPathQuery &&
+              renderList(
+                checkCondition?.checkPathString?.settings?.inValidQuery
+              )}
+          </div>
         </div>
       </div>
 
@@ -360,19 +362,47 @@ const ValidationResults: React.FC<ValidationResultsProps> = ({
         <div style={testCaseStyle}>
           <h4 style={subHeaderStyle}>a. Check Custom code</h4>
           <div style={testItemStyle}>
-            <span>• Is Actions implemented by Custom code:</span>
-            {renderStatus(
-              checkActions?.checkActions?.isImplementedByCustomCode
-            )}
+            <span>• Is Actions implemented by Custom code</span>
+            {renderStatus(checkActions?.checkActions?.isContainedActions)}
           </div>
 
-          <h4 style={subHeaderStyle}>b. Check PII</h4>
-          {checkActions?.checkActions?.validComponents?.map((comp, i) => (
-            <div style={testItemStyle} key={i}>
-              <span>• {comp?.reason ?? "No reason provided"}</span>
-              {renderStatus(comp?.isValid)}
-            </div>
-          ))}
+          <div style={testItemStyle}>
+            <span className="ml-2">• Extensions</span>
+            {checkActions?.checkActions?.isContainedActions &&
+              renderList(checkActions?.checkActions?.extensions)}
+          </div>
+          <div style={testItemStyle}>
+            <span className="ml-2">• Types</span>
+            {checkActions?.checkActions?.isContainedActions &&
+              renderList(checkActions?.checkActions?.type)}
+          </div>
+          <div style={testItemStyle}>
+            <span className="ml-2">• Language</span>
+            {!checkActions?.checkActions?.isContainedActions &&
+              renderMatchString(checkActions?.checkActions?.settings?.method, [
+                "html",
+              ])}
+          </div>
+
+          <h4 style={subHeaderStyle}>b. Check Code Inside</h4>
+          <div style={testItemStyle}>
+            <span className="ml-2">• Don't Contain PII</span>
+            {renderStatus(!checkActions?.checkActions?.settings?.containPII)}
+          </div>
+          <div style={testItemStyle}>
+            <span className="ml-2">
+              • Don't Contain Single Character Variable
+            </span>
+            {renderStatus(
+              !checkActions?.checkActions?.settings?.singleVariable
+            )}
+          </div>
+          <div style={testItemStyle}>
+            <span className="ml-2">• Keyword is not included</span>
+            {renderStatus(
+              checkActions?.checkActions?.settings?.inValidQuery.length <= 0
+            )}
+          </div>
         </div>
       </div>
     </div>

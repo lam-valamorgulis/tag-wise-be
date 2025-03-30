@@ -1,12 +1,8 @@
 const adobeApi = require('../service/adobeApi');
 
 async function getPropertyAdobeApi(protertyId) {
-  console.log('Searching for property:', protertyId);
-
   try {
     const response = await adobeApi.get(`/properties/${protertyId}`);
-
-    console.log('Adobe API response:', response.data);
 
     return response.data;
   } catch (error) {

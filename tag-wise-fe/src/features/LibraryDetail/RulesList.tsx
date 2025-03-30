@@ -1,144 +1,98 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { RiseOutlined } from "@ant-design/icons";
-import { Button, Col, Collapse, Row, message } from "antd";
-import { useState } from "react";
+import { Collapse } from "antd";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import Loading from "../../components/Loading";
+import { apiRuleInProduction } from "../../utils/axios";
+import { useRuleValidation } from "./hooks/useRuleValidation";
 import type Options from "./Options";
+import RuleLabel from "./RuleLabel";
 import RuleValidationDetail from "./RuleValidationDetail";
-import { RuleList } from "./useRule";
-import { useRuleValidation } from "./useRuleValidation";
+import { ApiDataState, RuleApiData, RuleList, ValidationResult } from "./type";
 
-import { useEffect } from "react";
-import { LibrarySummary } from "./useLibrary";
-import { Property } from "./useProperty";
-
-function RulesList({
-  rules,
-  options,
-  librarySummary,
-  property,
-}: {
-  rules: RuleList;
-  options: Options;
-  librarySummary: LibrarySummary;
-  property: Property;
-}) {
-  const { ruleValidation, ruleValidationResult } = useRuleValidation();
+function RulesList({ rules, options }: { rules: RuleList; options: Options }) {
+  const { ruleValidation, ruleValidationResult, isValidating } =
+    useRuleValidation();
   const { propertyId } = useParams<{ propertyId: string }>();
   const [activePanels, setActivePanels] = useState<string[]>([]);
-  const [validationResults, setValidationResults] = useState<
-    Record<string, any>
-  >({});
+  const [validationResults, setValidationResults] = useState<ValidationResult>(
+    {}
+  );
   const [validatingRuleId, setValidatingRuleId] = useState<string | null>(null);
+  const [apiData, setApiData] = useState<ApiDataState>({});
+
+  // Fetch data for all rules when component mounts or rules change
+  useEffect(() => {
+    const fetchAllRuleData = async () => {
+      const dataPromises = rules.map(async (rule) => {
+        const response = await apiRuleInProduction(rule.id);
+        const data: RuleApiData = response[0];
+        return { id: rule.id, data };
+      });
+
+      const results = await Promise.all(dataPromises);
+      const newApiData = results.reduce<ApiDataState>((acc, { id, data }) => {
+        acc[id] = data;
+        return acc;
+      }, {});
+
+      setApiData(newApiData);
+    };
+
+    fetchAllRuleData();
+  }, [rules]);
 
   const handleValidateRule = async (ruleId: string, ruleName: string) => {
     try {
-      setValidatingRuleId(ruleId); // Track which rule is being validated
-
+      setValidatingRuleId(ruleId);
       await ruleValidation({ ruleId, data: { ...options, ruleName } });
-
-      // Keep the panel open
       if (!activePanels.includes(ruleId)) {
         setActivePanels((prev) => [...prev, ruleId]);
       }
-
-      message.success({
-        content: `Validation completed for ${ruleName}`,
-        key: ruleId,
-      });
     } catch (error) {
       console.error("Validation Error:", error);
-      message.error(`Validation failed for ${ruleName}`);
     }
   };
 
-  // Automatically update UI when ruleValidationResult changes
   useEffect(() => {
     if (validatingRuleId && ruleValidationResult) {
       setValidationResults((prevResults) => ({
         ...prevResults,
-        [validatingRuleId]:
-          ruleValidationResult ?? "No validation data available",
+        [validatingRuleId]: ruleValidationResult,
       }));
-      setValidatingRuleId(null); // Reset after storing result
+      setValidatingRuleId(null);
     }
   }, [ruleValidationResult, validatingRuleId]);
 
-  // Handle collapse panel change
+  if (isValidating) {
+    return <Loading />;
+  }
+
   const handleCollapseChange = (keys: string | string[]) => {
     setActivePanels(Array.isArray(keys) ? keys : [keys]);
   };
 
-  const collapseItems = rules.map((rule) => ({
-    key: rule.id,
-    label: (
-      <Row
-        align="middle"
-        style={{
-          width: "100%",
-          padding: "4px 0",
-          fontSize: "10px",
-          borderRadius: "3px",
-          margin: "2px 0",
-        }}
-      >
-        {/* Equal width columns */}
-        <Col span={8} style={{ textAlign: "left" }}>
-          <span style={{ color: "#333" }}>
-            {property.propertyName} - {librarySummary.libraryName}
-          </span>
-        </Col>
-        <Col span={8} style={{ textAlign: "center" }}>
-          <span
-            style={{
-              color: "#333",
-              fontWeight: "bold",
-              display: "flex",
-              justifyContent: "left",
-              marginLeft: "100px",
-            }}
-          >
-            {rule.name}
-            <a
-              href={`https://experience.adobe.com/#/@samsung/data-collection/tags/companies/COae164dc89349443cb5092e1fdc571f55/properties/${propertyId}/rules/${rule.id}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ marginLeft: "4px" }}
-            >
-              <RiseOutlined style={{ fontSize: "16px", color: "blueviolet" }} />
-            </a>
-          </span>
-        </Col>
-        <Col span={8} style={{ textAlign: "right" }}>
-          <Button
-            type="dashed"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              handleValidateRule(rule.id, rule.name);
-            }}
-            style={{
-              fontSize: "12px",
-              padding: "0 8px",
-              margin: "0 8px",
-              height: "auto",
-              borderColor: "blue",
-              color: "#333",
-            }}
-          >
-            Validate
-          </Button>
-        </Col>
-      </Row>
-    ),
-    children: (
-      <RuleValidationDetail
-        ruleValidationResult={
-          validationResults[rule.id] ?? "Click 'Validate' to check rule"
-        }
-      />
-    ),
-  }));
+  const collapseItems = rules.map((rule) => {
+    const ruleApiData = apiData[rule.id] || {};
+
+    return {
+      key: rule.id,
+      label: (
+        <RuleLabel
+          rule={rule}
+          ruleApiData={ruleApiData}
+          propertyId={propertyId!}
+          handleValidateRule={handleValidateRule}
+        />
+      ),
+      children: (
+        <RuleValidationDetail
+          ruleValidationResult={
+            validationResults[rule.id] ?? "Click 'Validate' to check rule"
+          }
+        />
+      ),
+    };
+  });
 
   return (
     <Collapse

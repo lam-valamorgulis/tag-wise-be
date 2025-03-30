@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
-import { apiSummaryLibrary } from "../../utils/axios";
+import { apiSummaryLibrary } from "../../../utils/axios";
 
 interface RulesName {
   [key: string]: number;

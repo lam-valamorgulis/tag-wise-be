@@ -1,5 +1,6 @@
 import type { FormProps } from "antd";
 import { Button, Form, Input } from "antd";
+import { useGeneralInformation } from "../../context/GeneralInformationProvider";
 
 export type FieldType = {
   libraryName?: string;
@@ -13,12 +14,18 @@ function SearchLibrary({
   isSearching: boolean;
   onSearch: (searchData: FieldType) => void;
 }) {
-  const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
-    const { libraryName, propertyName } = values;
-    onSearch({
-      libraryName: libraryName ? libraryName.trim() : "",
-      propertyName: propertyName ? propertyName.trim() : "",
-    });
+  const { libraryName, propertyName, setLibraryName, setPropertyName } =
+    useGeneralInformation();
+
+  const onFinish: FormProps<FieldType>["onFinish"] = (values) => {
+    const trimmedValues = {
+      libraryName: values.libraryName?.trim() ?? "",
+      propertyName: values.propertyName?.trim() ?? "",
+    };
+
+    setLibraryName(trimmedValues.libraryName);
+    setPropertyName(trimmedValues.propertyName);
+    onSearch(trimmedValues);
   };
 
   const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
@@ -40,7 +47,7 @@ function SearchLibrary({
       >
         <Form.Item<FieldType>
           name="libraryName"
-          initialValue="20250203 DIA Cheil_Date Range_1"
+          initialValue={libraryName}
           label="Library Name"
           rules={[
             { required: true, message: "Please input your Library Name!" },
@@ -55,7 +62,7 @@ function SearchLibrary({
 
         <Form.Item<FieldType>
           name="propertyName"
-          initialValue="ZP6_HU-Hungary(EU SEH) WebSDK"
+          initialValue={propertyName}
           label="Property Name"
           rules={[
             { required: true, message: "Please input your Property Name!" },

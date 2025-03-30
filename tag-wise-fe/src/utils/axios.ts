@@ -1,179 +1,147 @@
 import axios from "axios";
+interface CommentSearchParams {
+  searchTerm?: string;
+  category?: string;
+  page?: number;
+  limit?: number;
+}
+
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
-const apiLibrary = axios.create({
-  baseURL: BASE_URL + "/library",
+// 🔹 Centralized API instance
+const apiClient = axios.create({
+  baseURL: BASE_URL,
 });
 
-const apiProperty = axios.create({
-  baseURL: BASE_URL + "/property",
-});
+// 🔹 Error Handling Function
+const handleError = (error: unknown) => {
+  console.error("API Error:", error);
+  throw error;
+};
 
-const apiRule = axios.create({
-  baseURL: BASE_URL + "/rule",
-});
-
-const apiComment = axios.create({
-  baseURL: BASE_URL + "/comments",
-});
-
-const apiAdobeProfile = axios.create({
-  baseURL: BASE_URL + "/account_profile",
-});
-
+// 🔹 API Functions
 const apiSearchLibrary = async (data: {
   libraryName: string;
   propertyName: string;
-}) => {
-  try {
-    const response = await apiLibrary.post("/search", data);
-    return response.data;
-  } catch (error) {
-    console.error("Error:", error);
-    throw error;
-  }
-};
+}) =>
+  apiClient
+    .post("/library/search", data)
+    .then((res) => res.data)
+    .catch(handleError);
 
 const apiCreateLibrary = async (data: {
   propertiesId: string[];
   libraryName: string;
-}) => {
-  try {
-    const response = await apiLibrary.post("/bulk_create", data);
-    return response.data;
-  } catch (error) {
-    console.error("Error:", error);
-    throw error;
-  }
-};
+}) =>
+  apiClient
+    .post("/library/bulk_create", data)
+    .then((res) => res.data)
+    .catch(handleError);
 
-const apiSearchProperty = async (data: { propertyName: string }) => {
-  try {
-    const response = await apiProperty.post("/search", data);
-    return response.data;
-  } catch (error) {
-    console.error("Error:", error);
-    throw error;
-  }
-};
+const apiSearchProperty = async (data: { propertyName: string }) =>
+  apiClient
+    .post("/property/search", data)
+    .then((res) => res.data)
+    .catch(handleError);
 
-const apiDetailProperty = async (propertyId: string) => {
-  try {
-    const response = await apiProperty.get("/detail/" + propertyId);
-    return response.data;
-  } catch (error) {
-    console.error("Error:", error);
-    throw error;
-  }
-};
+const apiDetailProperty = async (propertyId: string) =>
+  apiClient
+    .get(`/property/detail/${propertyId}`)
+    .then((res) => res.data)
+    .catch(handleError);
 
-const apiSummaryLibrary = async (libraryId: string) => {
-  try {
-    const response = await apiLibrary.get(`/${libraryId}/summary`);
-    return response.data;
-  } catch (error) {
-    console.error("Error:", error);
-    throw error;
-  }
-};
+const apiSummaryLibrary = async (libraryId: string) =>
+  apiClient
+    .get(`/library/${libraryId}/summary`)
+    .then((res) => res.data)
+    .catch(handleError);
 
-const apiRuleList = async (libraryId: string) => {
-  try {
-    const response = await apiRule.get(`/${libraryId}/rules`);
-    return response.data;
-  } catch (error) {
-    console.error("Error:", error);
-    throw error;
-  }
-};
+const apiGetDataElementsLibrary = async (libraryId: string) =>
+  apiClient
+    .get(`/library/${libraryId}/data_element`)
+    .then((res) => res.data)
+    .catch(handleError);
+
+const apiGetExtensionsLibrary = async (libraryId: string) =>
+  apiClient
+    .get(`/library/${libraryId}/extension`)
+    .then((res) => res.data)
+    .catch(handleError);
+
+const apiRuleList = async (libraryId: string) =>
+  apiClient
+    .get(`/rule/${libraryId}/rules`)
+    .then((res) => res.data)
+    .catch(handleError);
+
+const apiRuleInProduction = async (ruleId: string) =>
+  apiClient
+    .get(`/rule/${ruleId}/in_production`)
+    .then((res) => res.data)
+    .catch(handleError);
 
 const apiValidateRule = async (
   ruleId: string,
   data: {
-    ruleName: string;
-    isEU: boolean;
-    isHqRule: boolean;
-    keyWord: string[];
     isShopSection: boolean;
+    isRequiredConsent: boolean;
+    keyword: string[];
+    ruleName: string;
   }
-) => {
-  try {
-    const response = await apiRule.post(`/${ruleId}/validate`, data);
-    return response.data;
-  } catch (error) {
-    console.error("Error:", error);
-    throw error;
-  }
-};
+) =>
+  apiClient
+    .post(`/rule/${ruleId}/validate`, data)
+    .then((res) => res)
+    .catch(handleError);
 
-const apiGetListComment = async (hashtag?: string, category?: string) => {
-  try {
-    const response = await apiComment.get("/", {
+const apiGetListComment = async ({
+  searchTerm,
+  category,
+  page = 1,
+  limit = 5,
+}: CommentSearchParams) =>
+  apiClient
+    .get("/comments/search", {
       params: {
-        ...(hashtag ? { hashtag: encodeURIComponent(hashtag) } : {}),
-        ...(category ? { category: encodeURIComponent(category) } : {}),
+        ...(searchTerm && { searchTerm: encodeURIComponent(searchTerm) }),
+        ...(category && { category: encodeURIComponent(category) }),
+        page,
+        limit,
       },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching comments:", error);
-    throw error;
-  }
-};
+    })
+    .then((res) => res.data.data)
+    .catch(handleError);
 
 const apiCreateComment = async (data: {
   category: string;
-  commentDetail: string;
-  hashtag?: string;
-}) => {
-  try {
-    const response = await apiComment.post(`/`, data);
-    return response.data;
-  } catch (error) {
-    console.error("Error:", error);
-    throw error;
-  }
-};
+  purpose: string;
+  comment: string;
+  createdBy: string;
+}) =>
+  apiClient
+    .post("/comments", data)
+    .then((res) => res.data)
+    .catch(handleError);
 
 const apiEditComment = async (
   commentId: string,
   data: {
     category: string;
-    commentDetail: string;
-    hashtag?: string;
+    comment: string;
+    purpose: string;
+    createdBy: string;
   }
-) => {
-  try {
-    const response = await apiComment.put(`/${commentId}`, data);
-    return response.data;
-  } catch (error) {
-    console.error("Error:", error);
-    throw error;
-  }
-};
+) =>
+  apiClient
+    .put(`/comments/${commentId}`, data)
+    .then((res) => res.data)
+    .catch(handleError);
 
-const apiDeleteComment = async (commentId: string) => {
-  try {
-    const response = await apiComment.delete(`/${commentId}`);
-    return response.data;
-  } catch (error) {
-    console.error("Error:", error);
-    throw error;
-  }
-};
-
-const apiSearchProfile = async (data: {
-  siteCode: string;
-  subsidinary: string;
-}) => {
-  try {
-    const response = await apiAdobeProfile.post("/", data);
-    return response.data;
-  } catch (error) {
-    console.error("Error:", error);
-    throw error;
-  }
-};
+const apiDeleteComment = async (commentId: string) =>
+  apiClient
+    .delete(`/comments/${commentId}`)
+    .then((res) => res.data)
+    .catch(handleError);
 
 export {
   apiCreateComment,
@@ -181,11 +149,12 @@ export {
   apiDeleteComment,
   apiDetailProperty,
   apiEditComment,
+  apiGetDataElementsLibrary,
+  apiGetExtensionsLibrary,
   apiGetListComment,
-  apiLibrary,
+  apiRuleInProduction,
   apiRuleList,
   apiSearchLibrary,
-  apiSearchProfile,
   apiSearchProperty,
   apiSummaryLibrary,
   apiValidateRule,
