@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
+require('dotenv').config();
 
 const api = require('./routes/api');
 
@@ -8,7 +9,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: '*', // Allow all origins
+    origin: process.env.ALLOWED_ORIGIN || '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   }),
 );
