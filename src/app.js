@@ -6,16 +6,6 @@ const api = require('./routes/api');
 
 const app = express();
 
-// // CORS configuration
-// const allowedOrigins = ['http://localhost:5173', 'http://144.24.91.195:4000'];
-// app.use(
-//   cors({
-//     origin: allowedOrigins,
-//     credentials: true,
-//     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-//   }),
-// );
-
 app.use(
   cors({
     origin: '*', // Allow all origins
