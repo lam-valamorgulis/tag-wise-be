@@ -4,16 +4,14 @@ const {
   httpGetAllComments,
   httpUpdateComment,
   httpDeleteComment,
-  httpSearchComments,
-  httpGetCommentsByCategory,
+  httpSearchWithFilters,
 } = require('./comment.controller');
 
 const commentRouter = express.Router();
 
 // Combined search and filter endpoint
 commentRouter.get('/', httpGetAllComments);
-commentRouter.get('/search', httpSearchComments);
-commentRouter.get('/category', httpGetCommentsByCategory);
+commentRouter.get('/search', httpSearchWithFilters);
 commentRouter.post('/', httpAddComment);
 commentRouter.put('/:id', httpUpdateComment);
 commentRouter.delete('/:id', httpDeleteComment);

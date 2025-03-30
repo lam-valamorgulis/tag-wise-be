@@ -167,6 +167,47 @@ async function httpSearchComments(req, res) {
   }
 }
 
+// Add this to your controller file
+
+async function httpSearchWithFilters(req, res) {
+  try {
+    const {
+      category,
+      searchTerm,
+      sortBy = 'createdAt',
+      order = 'desc',
+      page = 1,
+      limit = 10,
+    } = req.query;
+
+    // Decode URL-encoded parameters
+    const decodedCategory = category ? decodeURIComponent(category) : null;
+    const decodedSearchTerm = searchTerm
+      ? decodeURIComponent(searchTerm)
+      : null;
+
+    // Validate category if provided
+    if (decodedCategory) {
+      validateCategory(decodedCategory);
+    }
+
+    validateSortField(sortBy);
+    const pagination = validatePagination(page, limit);
+
+    const result = await commentRepository.searchWithFilters({
+      category: decodedCategory,
+      searchTerm: decodedSearchTerm,
+      sortBy,
+      order,
+      ...pagination,
+    });
+
+    return sendResponse(res, result);
+  } catch (error) {
+    return handleError(res, error, 'Failed to search comments');
+  }
+}
+
 async function httpGetCommentsByCategory(req, res) {
   try {
     const { category: encodedCategory, page = 1, limit = 10 } = req.query;
@@ -196,4 +237,5 @@ module.exports = {
   httpDeleteComment,
   httpSearchComments,
   httpGetCommentsByCategory,
+  httpSearchWithFilters,
 };

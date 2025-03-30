@@ -50,7 +50,7 @@ function validateDateRangeComponents(components) {
   const maxValidDate = new Date(now);
   maxValidDate.setMonth(maxValidDate.getMonth() + 2);
   maxValidDate.setDate(maxValidDate.getDate() + 14);
-  result.settings.maxAllowedDate = maxValidDate;
+  result.settings.maxAllowedDate.push(maxValidDate.toISOString().split('T')[0]);
 
   // Validate and convert expected dates to Date objects
   const validDates = result.settings.expectedEndDate
@@ -75,8 +75,9 @@ function validateDateRangeComponents(components) {
 async function validateRuleInProductionComponents(ruleID) {
   const result = {
     isUrgentRules: false,
-    currentEndDateInProduction: '',
+    currentEndDateInProduction: [],
   };
+
   if (!ruleID) return result;
 
   const getRulesInProduction = await getListRulesRevisonAdobeApi(ruleID);
@@ -86,14 +87,13 @@ async function validateRuleInProductionComponents(ruleID) {
     getRulesInProduction[0].id,
   );
 
-  // Categorize the components
   const categorizedComponents = categorizeRuleComponents(
     getRulesComponentInProduction.data,
   );
 
   const dateRangeComponents = categorizedComponents.conditions.filter(
     (component) =>
-      component.attributes.delegateDescriptorId === DATE_RANGE_CONDITION,
+      component.attributes.delegate_descriptor_id === DATE_RANGE_CONDITION,
   );
 
   if (dateRangeComponents.length === 0) {
@@ -102,8 +102,20 @@ async function validateRuleInProductionComponents(ruleID) {
   }
 
   const settings = parseSettings(dateRangeComponents[0].attributes.settings);
-  result.currentEndDateInProduction = settings.end;
-  result.isUrgentRules = isWithinThreeDays(settings.end);
+
+  // Convert the end date string to a Date object
+  const endDate = new Date(settings.end);
+
+  // Validate if the date is valid
+  if (Number.isNaN(endDate.getTime())) {
+    console.error('Invalid date format:', settings.end);
+    return result;
+  }
+
+  // Format the date as YYYY-MM-DD
+  result.currentEndDateInProduction.push(endDate.toISOString().split('T')[0]);
+
+  result.isUrgentRules = isWithinThreeDays(endDate);
   return result;
 }
 

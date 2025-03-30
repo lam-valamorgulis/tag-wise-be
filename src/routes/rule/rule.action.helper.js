@@ -1,4 +1,4 @@
-const { CUSTOM_CODE } = require('../../utils/constants');
+const { ACTION_CUSTOM_CODE } = require('../../utils/constants');
 
 function validateActions(components, keyWords) {
   const result = {
@@ -18,13 +18,14 @@ function validateActions(components, keyWords) {
   // Process each component
   components.forEach((component) => {
     const descriptorId = component.attributes.delegate_descriptor_id;
+
     const settings =
       typeof component.attributes.settings === 'string'
         ? JSON.parse(component.attributes.settings)
         : component.attributes.settings;
 
     // Check for custom code actions
-    if (descriptorId === CUSTOM_CODE) {
+    if (descriptorId === ACTION_CUSTOM_CODE) {
       result.isContainedActions = true;
     }
 
@@ -78,7 +79,6 @@ function validateActions(components, keyWords) {
     }
   });
 
-  console.log('Actions validation result:', result);
   return result;
 }
 

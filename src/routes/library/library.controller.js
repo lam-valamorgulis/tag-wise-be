@@ -156,7 +156,7 @@ async function httpGetLibraryExtension(req, res) {
       });
     }
 
-    return res.status(200).json({ libraryExtension });
+    return res.status(200).json({ libraryExtension: libraryExtension.data });
   } catch (error) {
     console.error('Error fetching library details:', error);
     return res.status(500).json({
@@ -177,7 +177,9 @@ async function httpGetLibraryDataElement(req, res) {
       });
     }
 
-    return res.status(200).json({ libraryDataElement });
+    return res
+      .status(200)
+      .json({ libraryDataElement: libraryDataElement.data });
   } catch (error) {
     console.error('Error fetching library details:', error);
     return res.status(500).json({

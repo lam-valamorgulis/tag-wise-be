@@ -182,7 +182,6 @@ const commentRepository = {
       throw new CommentError(error.message);
     }
   },
-
   // Get comments by category with pagination
   findByCategory: async (category, page = 1, limit = 10) => {
     try {
@@ -198,6 +197,62 @@ const commentRepository = {
           .lean()
           .exec(),
         Comment.countDocuments({ category }),
+      ]);
+
+      return {
+        comments,
+        pagination: {
+          total,
+          page,
+          limit,
+          pages: Math.ceil(total / limit),
+        },
+      };
+    } catch (error) {
+      throw new CommentError(error.message);
+    }
+  },
+  // Add this to the commentRepository object
+
+  searchWithFilters: async ({
+    category,
+    searchTerm,
+    page = 1,
+    limit = 10,
+    sortBy = 'createdAt',
+    order = 'desc',
+  }) => {
+    try {
+      const query = {};
+
+      // Add category filter if provided
+      if (category) {
+        query.category = category;
+      }
+
+      // Add text search if provided
+      if (searchTerm) {
+        query.$text = { $search: searchTerm };
+      }
+
+      const skip = (page - 1) * limit;
+
+      // Build sort options
+      const sortOptions = searchTerm
+        ? { score: { $meta: 'textScore' } } // Sort by relevance if searching
+        : { [sortBy]: order === 'desc' ? -1 : 1 }; // Otherwise sort by specified field
+
+      const [comments, total] = await Promise.all([
+        Comment.find(
+          query,
+          searchTerm ? { score: { $meta: 'textScore' } } : null,
+        )
+          .sort(sortOptions)
+          .skip(skip)
+          .limit(limit)
+          .lean()
+          .exec(),
+        Comment.countDocuments(query),
       ]);
 
       return {

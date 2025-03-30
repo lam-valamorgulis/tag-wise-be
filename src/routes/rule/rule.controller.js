@@ -103,7 +103,7 @@ async function httpValidateRule(req, res) {
 
     // b.check current date of rules in production
     const checkDateRuleInProduction =
-      validateRuleInProductionComponents(ruleId);
+      await validateRuleInProductionComponents(ruleId);
 
     // c. check trust arc conditions
     const trustArcComponents = categorizedComponents.conditions.filter(
@@ -131,7 +131,6 @@ async function httpValidateRule(req, res) {
       (component) =>
         component.attributes.delegate_descriptor_id === ACTION_CUSTOM_CODE,
     );
-    console.log('actionCodeComponents', actionCodeComponents);
     const checkActions = validateActions(actionCodeComponents, keyWords);
 
     return res.status(200).json({

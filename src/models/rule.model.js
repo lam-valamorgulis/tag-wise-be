@@ -47,7 +47,7 @@ async function getRulesLibraryAdobeApi(libraryId) {
 async function getListRulesRevisonAdobeApi(ruleId) {
   try {
     const response = await adobeApi.get(
-      `/rules/${ruleId}/revisions?page[size]=10&sort=-revision_number`,
+      `/rules/${ruleId}/revisions?page[size]=20&sort=-revision_number`,
     );
     const publishedRules = (response.data.data || response.data || []).filter(
       (rule) =>
