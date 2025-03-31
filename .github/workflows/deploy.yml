@@ -1,0 +1,36 @@
+name: Auto Deploy to OCI
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Deploy to OCI
+        uses: appleboy/ssh-action@master
+        with:
+          host: 134.185.111.69
+          username: opc
+          key: ${{ secrets.OCI_SSH_KEY }}
+          script: |
+            cd /home/opc/tag-wise
+            git checkout develop
+            git pull origin develop
+            
+            # Backend Deployment
+            cd tag-wise-be
+            npm install
+            pm2 restart backend || pm2 start npm --name backend -- run start
+
+            # Frontend Deployment
+            cd ../tag-wise-fe
+            npm install
+            npm run build
+            pm2 restart frontend || pm2 serve dist --name frontend --spa --port 3000
