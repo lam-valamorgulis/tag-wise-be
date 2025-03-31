@@ -18,7 +18,7 @@ jobs:
       with:
         host: 134.185.111.69
         username: opc
-        key: ${{ secrets.OCI_SSH_KEY }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
           whoami
           pwd
