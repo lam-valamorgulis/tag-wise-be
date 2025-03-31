@@ -1,5 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+export interface RuleLabelProps {
+  rule: {
+    id: string;
+    name: string;
+    revision_number: number;
+    enable: boolean;
+  };
+  ruleApiData: RuleApiData;
+  propertyId: string;
+  handleValidateRule: (ruleId: string, ruleName: string) => void;
+}
+
 // RuleList and RuleItem types (unchanged)
 type RuleItem = {
   id: string;

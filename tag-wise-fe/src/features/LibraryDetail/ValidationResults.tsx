@@ -6,6 +6,31 @@ import { RuleValidationResult } from "./type";
 interface ValidationResultsProps {
   ruleValidationResult: RuleValidationResult;
 }
+export const renderMatchString = (
+  strings?: string[],
+  inValidValues?: string[]
+) => {
+  if (!strings || !Array.isArray(strings)) return <span>N/A</span>;
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+      {strings.map((str, index) => (
+        <span
+          key={index}
+          style={{
+            color: !inValidValues?.includes(str) ? "#090" : "#900",
+            marginLeft: "4px",
+            fontSize: "10px",
+            fontFamily: "monospace",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {str}
+        </span>
+      ))}
+    </div>
+  );
+};
 
 const ValidationResults: React.FC<ValidationResultsProps> = ({
   ruleValidationResult,
@@ -88,28 +113,6 @@ const ValidationResults: React.FC<ValidationResultsProps> = ({
       {isValid ? "✓ YES" : "✗ NO"}
     </span>
   );
-  const renderMatchString = (strings?: string[], inValidValues?: string[]) => {
-    if (!strings || !Array.isArray(strings)) return <span>N/A</span>;
-
-    return (
-      <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-        {strings.map((str, index) => (
-          <span
-            key={index}
-            style={{
-              color: !inValidValues?.includes(str) ? "#090" : "#900",
-              marginLeft: "4px",
-              fontSize: "10px",
-              fontFamily: "monospace",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {str}
-          </span>
-        ))}
-      </div>
-    );
-  };
 
   // Function to render a number with conditional color
   const renderNumber = (items: number | undefined | string) => {
@@ -123,7 +126,7 @@ const ValidationResults: React.FC<ValidationResultsProps> = ({
       <li
         style={{
           ...listItemStyle,
-          color, // Apply conditional color for numbers
+          color,
         }}
       >
         {items.toString()}
@@ -342,8 +345,8 @@ const ValidationResults: React.FC<ValidationResultsProps> = ({
             <span className="ml-2">• Keyword is not included</span>
             {checkCondition?.checkPathString?.isContainPathQuery &&
               renderStatus(
-                checkCondition?.checkPathString?.settings?.inValidQuery.length >
-                  0
+                checkCondition?.checkPathString?.settings?.inValidQuery
+                  .length <= 0
               )}
           </div>
           <div style={testItemStyle}>

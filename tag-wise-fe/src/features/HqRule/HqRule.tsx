@@ -1,7 +1,6 @@
 import type { TableColumnsType, TableProps } from "antd";
 import { Button, Input, Spin, Table, Typography, message } from "antd";
 import React, { useEffect, useState } from "react";
-import DividerComponent from "../../components/DividerComponent";
 import { apiCreateLibrary, apiSearchProperty } from "../../utils/axios";
 import SearchProperties, { SearchPropertyParam } from "./SearchProperties";
 
@@ -134,12 +133,8 @@ const HqRule: React.FC = () => {
   return (
     <div>
       <Typography.Title level={4}>Bulk Create Library</Typography.Title>
-
       {/* Search Input */}
       <SearchProperties onSearch={handleSearchProperty} isSearching={loading} />
-
-      <DividerComponent />
-
       {/* Table with Loading Indicator */}
       {loading ? (
         <div className="flex items-center justify-center min-h-screen">
@@ -153,7 +148,6 @@ const HqRule: React.FC = () => {
           pagination={false}
         />
       )}
-
       {/* Library Name Input */}
       <Input
         placeholder="Enter Library Name"
@@ -161,7 +155,6 @@ const HqRule: React.FC = () => {
         onChange={(e) => setLibraryName(e.target.value)}
         style={{ marginTop: "20px", marginBottom: "20px", width: "400px" }}
       />
-
       {/* Bulk Create Button */}
       <div>
         <Button

@@ -52,7 +52,11 @@ function ExtensionAndDataElements() {
   });
 
   if (isGettingDataElementLoading || isGettingExtensionLoading) {
-    return <Spin size="large" />;
+    return (
+      <div className="flex items-center justify-center h-full w-full">
+        <Spin size="default" tip="Loading..." />
+      </div>
+    );
   }
 
   if (dataElementError || extensionError) {

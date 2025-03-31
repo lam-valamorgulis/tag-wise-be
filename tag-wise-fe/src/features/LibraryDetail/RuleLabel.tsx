@@ -1,17 +1,13 @@
 import { Button, Col, Row } from "antd";
-import { RuleApiData } from "./type";
+import { RuleLabelProps } from "./type";
 
-interface RuleLabelProps {
-  rule: {
-    id: string;
-    name: string;
-    revision_number: number;
-    enable: boolean;
-  };
-  ruleApiData: RuleApiData;
-  propertyId: string;
-  handleValidateRule: (ruleId: string, ruleName: string) => void;
-}
+const SPECIAL_VENDORS = ["sprinklr", "medallia", "beusable"];
+
+// Add this helper function
+const containsVendorName = (ruleName: string): boolean => {
+  const normalizedName = ruleName.toLowerCase();
+  return SPECIAL_VENDORS.some((vendor) => normalizedName.includes(vendor));
+};
 
 const RuleLabel = ({
   rule,
@@ -45,51 +41,72 @@ const RuleLabel = ({
     color: "#fa8c16", // Orange for current revision number
   };
 
+  // Update the style constants
+  const revisionContainerStyle = {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    width: "100%",
+  };
+
+  const revisionInfoStyle = {
+    display: "flex",
+    alignItems: "center",
+    minWidth: "200px",
+  };
+
   return (
     <Row
       align="middle"
       style={{
         width: "100%",
-        padding: "4px 0",
         fontSize: "10px",
         borderRadius: "3px",
         margin: "2px 0",
       }}
     >
-      <Col span={8} style={{ textAlign: "left" }}>
-        <span style={commonTextStyle}>
-          Prod Rev:
-          <span style={productionNumberStyle}>
-            {ruleApiData.attributes?.revision_number ?? " -"}
-          </span>
-        </span>
-        <span style={commonTextStyle}>
-          | Current Rev:{" "}
-          <span style={currentNumberStyle}>{rule.revision_number}</span>
-        </span>
-        <a
-          href={`https://experience.adobe.com/#/@samsung/data-collection/tags/companies/COae164dc89349443cb5092e1fdc571f55/properties/${propertyId}/rules/${
-            ruleApiData.id ?? rule.id
-          }/ruleCompare/...${rule.id}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ marginLeft: "10px" }}
-        >
-          <Button type="dashed" style={commonButtonStyle}>
-            Compare
-          </Button>
-        </a>
+      <Col span={10} style={{ textAlign: "left" }}>
+        <div style={revisionContainerStyle}>
+          <div style={revisionInfoStyle}>
+            <span style={commonTextStyle}>
+              Prod Rev:
+              <span style={productionNumberStyle}>
+                {ruleApiData.attributes?.revision_number ?? " -"}
+              </span>
+            </span>
+            <span style={commonTextStyle}>
+              | Current Rev:{" "}
+              <span style={currentNumberStyle}>{rule.revision_number}</span>
+            </span>
+          </div>
 
-        <a
-          href={`https://experience.adobe.com/#/@samsung/data-collection/tags/companies/COae164dc89349443cb5092e1fdc571f55/properties/${propertyId}/rules/${rule.id}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ marginLeft: "4px" }}
-        >
-          <Button type="dashed" style={commonButtonStyle}>
-            Detail
-          </Button>
-        </a>
+          <a
+            href={`https://experience.adobe.com/#/@samsung/data-collection/tags/companies/COae164dc89349443cb5092e1fdc571f55/properties/${propertyId}/rules/${
+              ruleApiData.id ?? rule.id
+            }/ruleCompare/...${rule.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Button type="dashed" style={commonButtonStyle}>
+              Compare
+            </Button>
+          </a>
+          <a
+            href={`https://experience.adobe.com/#/@samsung/data-collection/tags/companies/COae164dc89349443cb5092e1fdc571f55/properties/${propertyId}/rules/${rule.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Button type="dashed" style={commonButtonStyle}>
+              Detail
+            </Button>
+          </a>
+          {containsVendorName(rule.name) && (
+            <Button type="dashed" style={commonButtonStyle}>
+              Non-Media Tag
+            </Button>
+          )}
+        </div>
+
         {!rule.enable && (
           <Button
             type="dashed"
@@ -102,7 +119,7 @@ const RuleLabel = ({
           </Button>
         )}
       </Col>
-      <Col span={8} style={{ textAlign: "center" }}>
+      <Col span={8} style={{ textAlign: "left" }}>
         <span
           style={{
             color: "#333",
@@ -118,7 +135,7 @@ const RuleLabel = ({
           {rule.name}
         </span>
       </Col>
-      <Col span={8} style={{ textAlign: "right" }}>
+      <Col span={6} style={{ textAlign: "right" }}>
         <Button
           type="dashed"
           onClick={(e) => {
