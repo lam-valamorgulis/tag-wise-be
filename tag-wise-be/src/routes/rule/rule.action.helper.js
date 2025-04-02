@@ -6,7 +6,7 @@ function validateActions(components, keyWords) {
     extensions: [],
     type: [],
     settings: {
-      method: [],
+      method: ['JS'],
       containPII: false,
       inValidQuery: [],
       singleVariable: false,
@@ -43,7 +43,7 @@ function validateActions(components, keyWords) {
 
     // Check method/language
     if (settings.language === 'html') {
-      result.settings.method.push('html');
+      result.settings.method.push('HTML');
     }
     const settingsStr = JSON.stringify(settings);
 

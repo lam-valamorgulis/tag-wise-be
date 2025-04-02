@@ -236,7 +236,7 @@ const ValidationResults: React.FC<ValidationResultsProps> = ({
           </div>
 
           <div style={testItemStyle}>
-            <span className="ml-2">• Data Elements Change Included</span>
+            <span className="ml-2">• Delay Navigation</span>
             {checkEvents?.checkClicks?.isContainedClick &&
               renderStatus(checkEvents?.checkClicks?.delayNavigation)}
           </div>
