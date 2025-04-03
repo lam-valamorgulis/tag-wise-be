@@ -1,13 +1,15 @@
 import { Col, Row, Typography } from "antd";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Loading from "../../components/Loading";
 import { useGeneralInformation } from "../../context/GeneralInformationProvider";
+import { apiRuleInProduction } from "../../utils/axios";
 import ExtensionAndDataElements from "./ExtensionAndDataElements";
 import GeneralInfo from "./GeneralInfo";
 import Options from "./Options";
 import RulesList from "./RulesList";
 import useLibrary from "./hooks/useLibrary";
 import useRule from "./hooks/useRule";
+import { ApiDataState, RuleApiData } from "./type";
 
 interface Rule {
   name: string;
@@ -20,6 +22,7 @@ export default function LibraryDetail() {
   const { options, setOptions, setRulesListName } = useGeneralInformation();
   const { isLibraryLoading: isLibraryLoading } = useLibrary();
   const { rulesList, isLoadingRules: isLoadingRules } = useRule();
+  const [apiData, setApiData] = useState<ApiDataState>({});
 
   const isLoading = isLibraryLoading || isLoadingRules;
 
@@ -30,9 +33,44 @@ export default function LibraryDetail() {
     }
   }, [rulesList, setRulesListName]);
 
+  useEffect(() => {
+    const fetchAllRuleData = async () => {
+      if (!rulesList?.length) return;
+
+      try {
+        const dataPromises = rulesList.map(async (rule) => {
+          try {
+            const response = await apiRuleInProduction(rule.id);
+            const data: RuleApiData = response[0];
+            return { id: rule.id, data };
+          } catch (error) {
+            console.error(`Failed to fetch rule ${rule.id}:`, error);
+            return { id: rule.id, data: null };
+          }
+        });
+
+        const results = await Promise.all(dataPromises);
+        const newApiData = results.reduce<ApiDataState>((acc, { id, data }) => {
+          if (data) {
+            acc[id] = data;
+          }
+          return acc;
+        }, {});
+
+        setApiData(newApiData);
+      } catch (error) {
+        console.error("Failed to fetch rule data:", error);
+      }
+    };
+
+    fetchAllRuleData();
+  }, [rulesList]);
+
   if (isLoading) {
     return <Loading />;
   }
+
+  console.log(apiData);
 
   return (
     <div className="px-3">
@@ -67,7 +105,11 @@ export default function LibraryDetail() {
       {rulesList && (
         <Row>
           <Col span={24}>
-            <RulesList rules={rulesList} options={options} />
+            <RulesList
+              rules={rulesList}
+              options={options}
+              rulesInProduction={apiData}
+            />
           </Col>
         </Row>
       )}

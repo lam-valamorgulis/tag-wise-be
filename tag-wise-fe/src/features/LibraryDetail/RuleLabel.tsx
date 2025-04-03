@@ -47,11 +47,10 @@ const RuleLabel = ({
               <span style={currentNumberStyle}>{rule.revision_number}</span>
             </span>
           </div>
-
           <a
             href={`https://experience.adobe.com/#/@samsung/data-collection/tags/companies/COae164dc89349443cb5092e1fdc571f55/properties/${propertyId}/rules/${
-              ruleApiData.id ?? rule.id
-            }/ruleCompare/...${rule.id}`}
+              rule.id
+            }/ruleCompare/${ruleApiData.id ?? rule.id}...${rule.id}`}
             target="_blank"
             rel="noopener noreferrer"
           >

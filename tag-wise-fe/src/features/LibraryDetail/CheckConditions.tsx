@@ -17,6 +17,9 @@ interface CheckConditionsProps {
 const CheckConditions: React.FC<CheckConditionsProps> = ({
   checkCondition,
 }) => {
+  const isUrgentRule = checkCondition.checkDateRuleInProduction?.isUrgentRules;
+  const colorString = isUrgentRule ? "#900" : "#090";
+
   return (
     <div style={sectionStyle}>
       <h3 style={sectionTitleStyle}>III. Check Conditions </h3>
@@ -46,12 +49,16 @@ const CheckConditions: React.FC<CheckConditionsProps> = ({
         </div>
         <div style={testItemStyle}>
           <span>• Current End Date</span>
-          {checkCondition?.checkDateRange?.isContainedDateRangeComponent &&
-            renderList(
-              checkCondition.checkDateRuleInProduction
-                ?.currentEndDateInProduction
-            )}
+          <div>
+            {checkCondition?.checkDateRange?.isContainedDateRangeComponent &&
+              renderList(
+                checkCondition.checkDateRuleInProduction
+                  ?.currentEndDateInProduction,
+                colorString
+              )}
+          </div>
         </div>
+
         <div style={testItemStyle}>
           <span>• Expected End Date</span>
           {checkCondition?.checkDateRange?.isContainedDateRangeComponent &&

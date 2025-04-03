@@ -2,14 +2,21 @@ import { Collapse } from "antd";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Loading from "../../components/Loading";
-import { apiRuleInProduction } from "../../utils/axios";
 import { useRuleValidation } from "./hooks/useRuleValidation";
 import type Options from "./Options";
 import RuleLabel from "./RuleLabel";
 import RuleValidationDetail from "./RuleValidationDetail";
-import { ApiDataState, RuleApiData, RuleList, ValidationResult } from "./type";
+import { ApiDataState, RuleList, ValidationResult } from "./type";
 
-function RulesList({ rules, options }: { rules: RuleList; options: Options }) {
+function RulesList({
+  rules,
+  options,
+  rulesInProduction,
+}: {
+  rules: RuleList;
+  options: Options;
+  rulesInProduction: ApiDataState;
+}) {
   const { ruleValidation, ruleValidationResult, isValidating } =
     useRuleValidation();
   const { propertyId } = useParams<{ propertyId: string }>();
@@ -18,28 +25,6 @@ function RulesList({ rules, options }: { rules: RuleList; options: Options }) {
     {}
   );
   const [validatingRuleId, setValidatingRuleId] = useState<string | null>(null);
-  const [apiData, setApiData] = useState<ApiDataState>({});
-
-  // Fetch data for all rules when component mounts or rules change
-  useEffect(() => {
-    const fetchAllRuleData = async () => {
-      const dataPromises = rules.map(async (rule) => {
-        const response = await apiRuleInProduction(rule.id);
-        const data: RuleApiData = response[0];
-        return { id: rule.id, data };
-      });
-
-      const results = await Promise.all(dataPromises);
-      const newApiData = results.reduce<ApiDataState>((acc, { id, data }) => {
-        acc[id] = data;
-        return acc;
-      }, {});
-
-      setApiData(newApiData);
-    };
-
-    fetchAllRuleData();
-  }, [rules]);
 
   const handleValidateRule = async (ruleId: string, ruleName: string) => {
     try {
@@ -68,7 +53,7 @@ function RulesList({ rules, options }: { rules: RuleList; options: Options }) {
   };
 
   const collapseItems = rules.map((rule) => {
-    const ruleApiData = apiData[rule.id] || {};
+    const ruleApiData = rulesInProduction[rule.id] || {};
 
     return {
       key: rule.id,

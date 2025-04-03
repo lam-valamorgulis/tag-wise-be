@@ -6,7 +6,7 @@ function validateActions(components, keyWords) {
     extensions: [],
     type: [],
     settings: {
-      method: ['javascript'],
+      method: [],
       containPII: false,
       inValidQuery: [],
       singleVariable: false,
@@ -44,6 +44,8 @@ function validateActions(components, keyWords) {
     // Check method/language
     if (settings.language === 'html') {
       result.settings.method.push('HTML');
+    } else {
+      result.settings.method.push('JAVASCRIPT');
     }
     const settingsStr = JSON.stringify(settings);
 
@@ -51,7 +53,7 @@ function validateActions(components, keyWords) {
     const piiPatterns = [
       /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/, // email
       /\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/, // phone
-      /\b(name|sex|gender)\b/i, // name, sex, gender
+      /\b(sex|gender|mail|email)\b/i, // name, sex, gender
       /(md5|sha1|sha256|hash)\(/i, // hash functions
     ];
 

@@ -24,14 +24,18 @@ export const renderNumber = (items: number | undefined | string) => {
   );
 };
 
-export const renderList = (items: string[] | undefined) => {
+export const renderList = (items: string[] | undefined, colorStr?: string) => {
   if (!items || !Array.isArray(items) || items.length === 0) return "";
   return (
     <ul style={{ paddingLeft: "10px", margin: "0" }}>
       {items.map((item, index) => (
         <li
           key={index}
-          style={{ color: "#090", marginLeft: "10px", listStyleType: "none" }}
+          style={{
+            color: colorStr ?? "#090",
+            marginLeft: "10px",
+            listStyleType: "none",
+          }}
         >
           {item}
         </li>
@@ -44,7 +48,6 @@ export const renderMatchString = (
   strings?: string[],
   inValidValues?: string[]
 ) => {
-  console.log(strings, inValidValues);
   if (!strings || !Array.isArray(strings)) return <span>-</span>;
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
@@ -52,7 +55,9 @@ export const renderMatchString = (
         <span
           key={index}
           style={{
-            color: !inValidValues?.includes(str) ? "#090" : "#900",
+            color: !inValidValues?.includes(str.toLowerCase())
+              ? "#090"
+              : "#900",
             marginLeft: "4px",
             fontSize: "10px",
             fontFamily: "monospace",

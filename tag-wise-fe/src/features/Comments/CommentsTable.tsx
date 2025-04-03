@@ -33,6 +33,7 @@ const CommentsTable: React.FC = () => {
   const [editingComment, setEditingComment] = useState<Comment | null>(null);
   const page = Number(searchParams.get("page")) || 1;
   const limit = Number(searchParams.get("limit")) || 5;
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const [form] = Form.useForm();
 
@@ -65,43 +66,64 @@ const CommentsTable: React.FC = () => {
     setSearchParams(newParams);
   };
 
-  const { mutate: saveComment } = useMutation({
+  const { mutate: saveComment, isPending: isSaving } = useMutation({
     mutationFn: async (comment: CommentFormValues & { _id?: string }) => {
-      const method = comment._id ? "PUT" : "POST";
-      let response;
+      try {
+        const commentWithUser = {
+          ...comment,
+          createdBy: user?.email || "anonymous",
+        };
 
-      const commentWithUser = {
-        ...comment,
-        createdBy: user?.email || "anonymous",
-      };
-
-      if (method === "POST") {
-        response = await apiCreateComment(commentWithUser);
-      } else {
-        response = await apiEditComment(comment._id ?? "", commentWithUser);
+        return comment._id
+          ? await apiEditComment(comment._id, commentWithUser)
+          : await apiCreateComment(commentWithUser);
+      } catch (error) {
+        throw new Error(
+          error instanceof Error ? error.message : "Failed to save comment"
+        );
       }
-
-      return response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["comments"] });
       setIsModalOpen(false);
       setEditingComment(null);
       form.resetFields();
-      message.success("Comment saved successfully");
+      message.success({
+        content: "Comment saved successfully",
+        duration: 2,
+        style: { marginTop: "20px" },
+      });
     },
     onError: (error: Error) => {
-      Modal.error({
-        title: "Operation Failed",
-        content: error.message,
+      message.error({
+        content: error.message || "Failed to save comment",
+        duration: 3,
       });
     },
   });
 
   const { mutate: deleteComment } = useMutation({
-    mutationFn: (id: string) => apiDeleteComment(id),
+    mutationFn: async (id: string) => {
+      setDeletingId(id);
+      try {
+        await apiDeleteComment(id);
+      } finally {
+        setDeletingId(null);
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["comments"] });
+      message.success({
+        content: "Comment deleted successfully",
+        duration: 2,
+        style: { marginTop: "20px" },
+      });
+    },
+    onError: (error: Error) => {
+      message.error({
+        content: error.message || "Failed to delete comment",
+        duration: 3,
+      });
     },
   });
 
@@ -239,7 +261,12 @@ const CommentsTable: React.FC = () => {
           >
             Edit
           </Button>
-          <Button danger onClick={() => deleteComment(record._id)}>
+          <Button
+            danger
+            onClick={() => deleteComment(record._id)}
+            loading={deletingId === record._id}
+            disabled={deletingId === record._id}
+          >
             Delete
           </Button>
         </div>
@@ -363,8 +390,14 @@ const CommentsTable: React.FC = () => {
             <Input.TextArea />
           </Form.Item>
 
-          <Button type="primary" htmlType="submit" className="w-full">
-            Submit
+          <Button
+            type="primary"
+            htmlType="submit"
+            className="w-full"
+            loading={isSaving}
+            disabled={isSaving}
+          >
+            {isSaving ? "Saving..." : "Submit"}
           </Button>
         </Form>
       </Modal>
