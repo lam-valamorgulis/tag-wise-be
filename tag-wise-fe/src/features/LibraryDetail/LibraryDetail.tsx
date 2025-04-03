@@ -1,5 +1,6 @@
-import { Col, Row, Spin, Typography } from "antd";
+import { Col, Row, Typography } from "antd";
 import { useEffect } from "react";
+import Loading from "../../components/Loading";
 import { useGeneralInformation } from "../../context/GeneralInformationProvider";
 import ExtensionAndDataElements from "./ExtensionAndDataElements";
 import GeneralInfo from "./GeneralInfo";
@@ -30,11 +31,7 @@ export default function LibraryDetail() {
   }, [rulesList, setRulesListName]);
 
   if (isLoading) {
-    return (
-      <div className="h-screen w-full flex items-center justify-center">
-        <Spin size="large" tip="Loading..." />
-      </div>
-    );
+    return <Loading />;
   }
 
   return (

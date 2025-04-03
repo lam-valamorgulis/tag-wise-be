@@ -63,10 +63,6 @@ function RulesList({ rules, options }: { rules: RuleList; options: Options }) {
     }
   }, [ruleValidationResult, validatingRuleId]);
 
-  if (isValidating) {
-    return <Loading />;
-  }
-
   const handleCollapseChange = (keys: string | string[]) => {
     setActivePanels(Array.isArray(keys) ? keys : [keys]);
   };
@@ -84,13 +80,18 @@ function RulesList({ rules, options }: { rules: RuleList; options: Options }) {
           handleValidateRule={handleValidateRule}
         />
       ),
-      children: (
-        <RuleValidationDetail
-          ruleValidationResult={
-            validationResults[rule.id] ?? "Click 'Validate' to check rule"
-          }
-        />
-      ),
+      children:
+        isValidating && validatingRuleId === rule.id ? (
+          <div className="h-40">
+            <Loading />
+          </div>
+        ) : (
+          <RuleValidationDetail
+            ruleValidationResult={
+              validationResults[rule.id] ?? "Click 'Validate' to check rule"
+            }
+          />
+        ),
     };
   });
 

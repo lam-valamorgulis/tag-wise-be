@@ -6,7 +6,7 @@ function validateActions(components, keyWords) {
     extensions: [],
     type: [],
     settings: {
-      method: ['JS'],
+      method: ['javascript'],
       containPII: false,
       inValidQuery: [],
       singleVariable: false,

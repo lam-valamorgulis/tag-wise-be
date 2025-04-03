@@ -37,12 +37,12 @@ export function GeneralInformationProvider({
 }: GeneralInformationProviderProps) {
   const [libraryId, setLibraryId] = useState<string>("");
   const [libraryName, setLibraryName] = useState<string>(
-    "20250203 DIA Cheil_Date Range_1"
+    "UDTest 31/3 test %%%!!"
   );
   const [libraryTotal, setLibraryTotal] = useState<number>(0);
   const [propertyId, setPropertyId] = useState<string>("");
   const [propertyName, setPropertyName] = useState<string>(
-    "ZP6_HU-Hungary(EU SEH) WebSDK"
+    "[CNX Ops] Test Property_0613"
   );
   const [options, setOptions] = useState<Options>({
     isShopSection: false,

@@ -1,4 +1,12 @@
 import { Button, Col, Row } from "antd";
+import {
+  commonButtonStyle,
+  commonTextStyle,
+  currentNumberStyle,
+  productionNumberStyle,
+  revisionContainerStyle,
+  revisionInfoStyle,
+} from "./styles/RuleLabel.ts";
 import { RuleLabelProps } from "./type";
 
 const SPECIAL_VENDORS = ["sprinklr", "medallia", "beusable"];
@@ -15,46 +23,6 @@ const RuleLabel = ({
   propertyId,
   handleValidateRule,
 }: RuleLabelProps) => {
-  // Common button style to match "Validate" button
-  const commonButtonStyle = {
-    fontSize: "12px",
-    padding: "0 8px",
-    margin: "0 8px",
-    height: "auto",
-    borderColor: "blue",
-    color: "#333",
-  };
-
-  // Common text style for consistency
-  const commonTextStyle = {
-    fontSize: "12px",
-    margin: "0 8px",
-    color: "#333", // Default color for labels
-  };
-
-  // Style for the revision numbers
-  const productionNumberStyle = {
-    color: "#52c41a", // Green for production revision number
-  };
-
-  const currentNumberStyle = {
-    color: "#fa8c16", // Orange for current revision number
-  };
-
-  // Update the style constants
-  const revisionContainerStyle = {
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-    width: "100%",
-  };
-
-  const revisionInfoStyle = {
-    display: "flex",
-    alignItems: "center",
-    minWidth: "200px",
-  };
-
   return (
     <Row
       align="middle"

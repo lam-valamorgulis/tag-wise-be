@@ -4,7 +4,7 @@ import useLibrary from "./hooks/useLibrary";
 import useProperty from "./hooks/useProperty";
 
 function GeneralInfo() {
-  const { setLibraryTotal } = useGeneralInformation();
+  const { setLibraryTotal, setPropertyName } = useGeneralInformation();
 
   const { propertyDetail: property } = useProperty();
   const { librarySummary } = useLibrary();
@@ -25,6 +25,7 @@ function GeneralInfo() {
   } = property.propertySiteCode;
 
   const { propertyName } = property;
+  setPropertyName(propertyName);
 
   return (
     <Row

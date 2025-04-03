@@ -24,9 +24,12 @@ const queryClient = new QueryClient({
 
 function App() {
   const { isLoading } = useAuth0();
-
   if (isLoading) {
-    return <Loading />;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loading />
+      </div>
+    );
   }
 
   return (

@@ -1,7 +1,8 @@
 import { CloseCircleOutlined } from "@ant-design/icons";
 import { Button, Checkbox, Col, Input, Row, Tag } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DividerComponent from "../../components/DividerComponent";
+import { useGeneralInformation } from "../../context/GeneralInformationProvider";
 
 type Options = {
   isShopSection: boolean;
@@ -16,12 +17,22 @@ function Options({
   onOptionsChange: (options: Options) => void;
   options: Options;
 }) {
+  const { propertyName } = useGeneralInformation();
+
   const [keywordInput, setKeywordInput] = useState("");
   const [keywordsList, setKeywordsList] = useState<string[]>(options.keyword);
   const handleChange = (key: string, value: boolean | string[]) => {
     const newOptions = { ...options, [key]: value };
     onOptionsChange(newOptions);
   };
+  useEffect(() => {
+    if (
+      propertyName?.toLowerCase().includes("shop") &&
+      !options.isShopSection
+    ) {
+      handleChange("isShopSection", true);
+    }
+  }, [propertyName]);
 
   const handleAddKeyword = () => {
     if (keywordInput && !keywordsList.includes(keywordInput)) {
@@ -44,7 +55,11 @@ function Options({
       <Col xs={24} md={8}>
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
           <Checkbox
-            checked={options.isShopSection}
+            checked={
+              propertyName?.toLowerCase().includes("shop") ||
+              options.isShopSection
+            }
+            disabled={propertyName?.toLowerCase().includes("shop")}
             onChange={(e) => handleChange("isShopSection", e.target.checked)}
           >
             1. Shop Section

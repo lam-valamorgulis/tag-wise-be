@@ -13,19 +13,23 @@ function LocalRules() {
     });
   };
 
-  if (isSearching) {
-    return (
-      <div>
-        <Loading />
-      </div>
-    );
-  }
+  // if (isSearching) {
+  //   return (
+  //     <div>
+  //       <Loading />
+  //     </div>
+  //   );
+  // }
 
   return (
     <>
       <SearchRule isSearching={isSearching} onSearch={handleSearch} />
       <hr className="border-slate-300" />
-      <LibraryResult searchLibraryResult={searchLibraryResult ?? {}} />
+      {isSearching ? (
+        <Loading />
+      ) : (
+        <LibraryResult searchLibraryResult={searchLibraryResult ?? {}} />
+      )}
     </>
   );
 }
