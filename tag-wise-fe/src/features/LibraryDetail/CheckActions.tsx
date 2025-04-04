@@ -19,7 +19,6 @@ interface CheckActionsProps {
 }
 
 const CheckActions: React.FC<CheckActionsProps> = ({ checkActions }) => {
-  console.log(checkActions?.checkActions?.settings?.method);
   return (
     <div style={sectionStyle}>
       <h3 style={sectionTitleStyle}>IV. Check Actions</h3>
@@ -50,17 +49,54 @@ const CheckActions: React.FC<CheckActionsProps> = ({ checkActions }) => {
         <h4 style={subHeaderStyle}>b. Check Code Inside</h4>
         <div style={testItemStyle}>
           <span>• Don't Contain PII</span>
-          {renderStatus(!checkActions?.checkActions?.settings?.containPII)}
+          {renderStatus(
+            checkActions?.checkActions?.settings?.containPII.length <= 0
+          )}
         </div>
+        {checkActions?.checkActions?.settings?.containPII?.length > 0 && (
+          <div style={testItemStyle}>
+            <span className="ml-2">Found PII types:</span>
+            {checkActions?.checkActions?.settings?.containPII?.map(
+              (piiType) => (
+                <div key={piiType} className="text-red-500">
+                  • {piiType}
+                </div>
+              )
+            )}
+          </div>
+        )}
         <div style={testItemStyle}>
-          <span>• Don't Contain Single Character Variable</span>
-          {renderStatus(!checkActions?.checkActions?.settings?.singleVariable)}
+          <span>• Don't Contain Single Char Var s</span>
+          {renderStatus(
+            !checkActions?.checkActions?.settings?.singleVariable?.length
+          )}
         </div>
+        {checkActions?.checkActions?.settings?.singleVariable?.length > 0 && (
+          <div style={testItemStyle}>
+            <span className="ml-2">Founded </span>
+            {checkActions?.checkActions?.settings?.singleVariable?.map(
+              (item) => (
+                <div key={item.match} className="text-red-500">
+                  • {item.match}
+                </div>
+              )
+            )}
+          </div>
+        )}
+
         <div style={testItemStyle}>
           <span>• Keyword is not included</span>
           {renderStatus(
             checkActions?.checkActions?.settings?.inValidQuery.length <= 0
           )}
+        </div>
+        <div style={testItemStyle}>
+          <span>• InValid Keyword</span>
+          {checkActions?.checkActions?.settings?.inValidQuery.length > 0 &&
+            renderList(
+              checkActions?.checkActions?.settings?.inValidQuery,
+              "#900"
+            )}
         </div>
       </div>
     </div>

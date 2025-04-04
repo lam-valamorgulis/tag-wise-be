@@ -8,7 +8,7 @@ interface ValidationRequestData {
   data: {
     isShopSection: boolean;
     isRequiredConsent: boolean;
-    keyword: string[];
+    keywords: string[];
     ruleName: string;
   };
 }

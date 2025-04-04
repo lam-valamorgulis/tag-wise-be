@@ -59,7 +59,6 @@ function getUniqueDescriptorNames(components) {
   return [...new Set(names)];
 }
 
-// Function to check if a single settings string contains anchorDelay
 function hasAnchorDelay(settingsString) {
   try {
     if (!settingsString || typeof settingsString !== 'string') {
@@ -76,19 +75,14 @@ function hasAnchorDelay(settingsString) {
     return false;
   }
 }
-// Function to check if the list contains any settings without anchorDelay
+
 function checkDelayNavigationList(settingsList) {
   if (!Array.isArray(settingsList) || settingsList.length === 0) {
-    return true; // Empty list or invalid input means "not all have anchorDelay"
+    return false;
   }
 
-  // Check if every element has anchorDelay
-  const allHaveAnchorDelay = settingsList.every((settingsString) =>
-    hasAnchorDelay(settingsString),
-  );
-
-  // Return true if at least one does NOT have anchorDelay, false if all have it
-  return !allHaveAnchorDelay;
+  // Check if any element has anchorDelay
+  return settingsList.some((settingsString) => hasAnchorDelay(settingsString));
 }
 
 // Function to parse and extract end dates, returning sorted YYYY-MM-DD strings

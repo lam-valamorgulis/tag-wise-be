@@ -74,9 +74,9 @@ const CheckEvents: React.FC<CheckEventsProps> = ({
             renderNumber(checkEvents?.checkClicks?.order)}
         </div>
         <div style={testItemStyle}>
-          <span>• Delay Navigation</span>
+          <span>• Don't select Delay Navigation</span>
           {checkEvents?.checkClicks?.isContainedClick &&
-            renderStatus(checkEvents?.checkClicks?.delayNavigation)}
+            renderStatus(!checkEvents?.checkClicks?.delayNavigation)}
         </div>
       </div>
 

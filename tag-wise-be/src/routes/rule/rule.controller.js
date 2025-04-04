@@ -37,7 +37,7 @@ const {
 async function httpValidateRule(req, res) {
   const ruleId = req.params.ruleComponentId;
 
-  const { ruleName, isRequiredConsent, isShopSection, keyWords } = req.body;
+  const { ruleName, isRequiredConsent, isShopSection, keywords } = req.body;
 
   if (!ruleName) {
     return res.status(400).json({
@@ -123,7 +123,7 @@ async function httpValidateRule(req, res) {
     );
     const checkPathString = validatePathContainKeyWords(
       pathStringComponents,
-      keyWords,
+      keywords,
     );
 
     // check actions
@@ -131,7 +131,7 @@ async function httpValidateRule(req, res) {
       (component) =>
         component.attributes.delegate_descriptor_id === ACTION_CUSTOM_CODE,
     );
-    const checkActions = validateActions(actionCodeComponents, keyWords);
+    const checkActions = validateActions(actionCodeComponents, keywords);
 
     return res.status(200).json({
       checkName: checkName,

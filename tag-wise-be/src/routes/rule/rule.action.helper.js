@@ -1,15 +1,15 @@
 const { ACTION_CUSTOM_CODE } = require('../../utils/constants');
 
-function validateActions(components, keyWords) {
+function validateActions(components, keywords) {
   const result = {
     isContainedActions: false,
     extensions: [],
     type: [],
     settings: {
       method: [],
-      containPII: false,
+      containPII: [],
       inValidQuery: [],
-      singleVariable: false,
+      singleVariable: [],
     },
   };
 
@@ -47,28 +47,50 @@ function validateActions(components, keyWords) {
     } else {
       result.settings.method.push('JAVASCRIPT');
     }
-    const settingsStr = JSON.stringify(settings);
+
+    // Convert source code to string for analysis
+    const settingsStr = JSON.stringify(settings.source);
 
     // Check for PII
+    // Define PII patterns with labels
     const piiPatterns = [
-      /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/, // email
-      /\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/, // phone
-      /\b(sex|gender|mail|email)\b/i, // name, sex, gender
-      /(md5|sha1|sha256|hash)\(/i, // hash functions
+      {
+        label: 'Email',
+        pattern: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/,
+      },
+      { label: 'Phone Number', pattern: /\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/ },
+      { label: 'Mail', pattern: /\b(mail|email)\b/i },
+      { label: 'Gender', pattern: /\b(sex|gender|female|male)\b/i },
+      { label: 'Hash Functions', pattern: /(md5|sha1|sha256|hash)\(/i },
     ];
 
-    result.settings.containPII = piiPatterns.some((pattern) =>
-      pattern.test(settingsStr),
-    );
+    // Check for PII and store detected types
+    piiPatterns.forEach(({ label, pattern }) => {
+      if (pattern.test(settingsStr)) {
+        result.settings.containPII.push(label);
+      }
+    });
 
-    // Check for single variable declarations
+    // Update the single variable check
     if (settings.source) {
-      result.settings.singleVariable = /var\s+[a-zA-Z]\b/.test(settings.source);
-    }
+      const singleVarPatterns = [
+        { type: 'var', pattern: /var\s+[sS]\b/ },
+        { type: 'function', pattern: /function\s+[sS]\b/ },
+      ];
 
+      singleVarPatterns.forEach(({ category, pattern }) => {
+        if (pattern.test(settings.source)) {
+          result.settings.singleVariable.push({
+            category,
+            match: settings.source.match(pattern)[0],
+          });
+        }
+      });
+    }
+    console.log(keywords, 90);
     // Enhanced check for invalid queries
-    if (keyWords && keyWords.length > 0) {
-      keyWords.forEach((keyword) => {
+    if (keywords && keywords.length > 0) {
+      keywords.forEach((keyword) => {
         // Create case-insensitive regex pattern for the keyword
         const keywordPattern = new RegExp(keyword, 'i');
         if (

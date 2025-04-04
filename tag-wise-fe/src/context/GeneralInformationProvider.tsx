@@ -3,7 +3,7 @@ import { createContext, ReactNode, useContext, useState } from "react";
 type Options = {
   isShopSection: boolean;
   isRequiredConsent: boolean;
-  keyword: string[];
+  keywords: string[];
 };
 
 interface GeneralInformationContextType {
@@ -37,7 +37,7 @@ export function GeneralInformationProvider({
 }: GeneralInformationProviderProps) {
   const [libraryId, setLibraryId] = useState<string>("");
   const [libraryName, setLibraryName] = useState<string>(
-    "UDTest 31/3 test %%%!!"
+    "Uyen Dang Test  1 - !@#$%^&*()_+"
   );
   const [libraryTotal, setLibraryTotal] = useState<number>(0);
   const [propertyId, setPropertyId] = useState<string>("");
@@ -47,7 +47,7 @@ export function GeneralInformationProvider({
   const [options, setOptions] = useState<Options>({
     isShopSection: false,
     isRequiredConsent: false,
-    keyword: [],
+    keywords: [],
   });
   const [rulesListName, setRulesListName] = useState<string[]>([]);
 

@@ -121,9 +121,13 @@ interface CheckTrustArcCondition {
   isContainedTrustArc: boolean;
 }
 
+interface ConfigurableItem {
+  [key: string]: string[];
+}
+
 interface CheckPathStringSettings {
   inValidQuery: string[];
-  configurable: string[];
+  configurable: ConfigurableItem[]; // Updated type to array of ConfigurableItem
 }
 
 interface CheckPathString {
@@ -143,12 +147,17 @@ interface CheckCondition {
   checkPathString: CheckPathString;
 }
 
+interface SingleVariableMatch {
+  type: "var" | "function";
+  match: string;
+}
+
 // checkActions section
 interface CheckActionsSettings {
   method: string[];
-  containPII: boolean;
+  containPII: string[];
   inValidQuery: string[];
-  singleVariable: boolean;
+  singleVariable: SingleVariableMatch[];
 }
 
 interface CheckActionsData {

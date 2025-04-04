@@ -72,19 +72,18 @@ const RuleLabel = ({
               Non-Media Tag
             </Button>
           )}
+          {!rule.enable && (
+            <Button
+              type="dashed"
+              style={{
+                ...commonButtonStyle,
+                color: "#fa8c16",
+              }}
+            >
+              Disable
+            </Button>
+          )}
         </div>
-
-        {!rule.enable && (
-          <Button
-            type="dashed"
-            style={{
-              ...commonButtonStyle,
-              color: "#fa8c16",
-            }}
-          >
-            Disable
-          </Button>
-        )}
       </Col>
       <Col span={8} style={{ textAlign: "left" }}>
         <span

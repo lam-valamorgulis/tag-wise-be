@@ -91,8 +91,34 @@ const CheckConditions: React.FC<CheckConditionsProps> = ({
           <h4 style={subHeaderStyle}>c. Check Path & Query String </h4>
           {renderStatus(checkCondition?.checkPathString?.isContainPathQuery)}
         </div>
+
+        {checkCondition?.checkPathString?.isContainPathQuery &&
+          checkCondition?.checkPathString?.settings?.configurable?.map(
+            (config, index: number) => {
+              const [type, paths] = Object.entries(config)[0];
+              return (
+                <div key={`${type}-${index}`} style={testItemStyle}>
+                  <span>{type}</span>
+                  <div style={{ marginLeft: "8px" }}>
+                    {paths.map((path, pathIndex) => (
+                      <span
+                        key={`${path}-${pathIndex}`}
+                        style={{
+                          color: path.trim() === "NOT" ? "#900" : "#090",
+                        }}
+                      >
+                        {pathIndex > 0 ? " - " : ""}
+                        {path}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              );
+            }
+          )}
+
         <div style={testItemStyle}>
-          <span>• Keyword is not included</span>
+          <span>• InValid Keyword in URL</span>
           {checkCondition?.checkPathString?.isContainPathQuery &&
             renderStatus(
               checkCondition?.checkPathString?.settings?.inValidQuery.length <=
@@ -102,7 +128,10 @@ const CheckConditions: React.FC<CheckConditionsProps> = ({
         <div style={testItemStyle}>
           <span>• InValid Keyword</span>
           {checkCondition?.checkPathString?.isContainPathQuery &&
-            renderList(checkCondition?.checkPathString?.settings?.inValidQuery)}
+            renderList(
+              checkCondition?.checkPathString?.settings?.inValidQuery,
+              "#900"
+            )}
         </div>
       </div>
     </div>

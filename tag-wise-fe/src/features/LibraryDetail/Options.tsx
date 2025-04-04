@@ -7,7 +7,7 @@ import { useGeneralInformation } from "../../context/GeneralInformationProvider"
 type Options = {
   isShopSection: boolean;
   isRequiredConsent: boolean;
-  keyword: string[];
+  keywords: string[];
 };
 
 function Options({
@@ -20,7 +20,7 @@ function Options({
   const { propertyName } = useGeneralInformation();
 
   const [keywordInput, setKeywordInput] = useState("");
-  const [keywordsList, setKeywordsList] = useState<string[]>(options.keyword);
+  const [keywordsList, setKeywordsList] = useState<string[]>(options.keywords);
   const handleChange = (key: string, value: boolean | string[]) => {
     const newOptions = { ...options, [key]: value };
     onOptionsChange(newOptions);
@@ -38,7 +38,7 @@ function Options({
     if (keywordInput && !keywordsList.includes(keywordInput)) {
       const updatedKeywords = [...keywordsList, keywordInput];
       setKeywordsList(updatedKeywords);
-      handleChange("keyword", updatedKeywords);
+      handleChange("keywords", updatedKeywords);
       setKeywordInput("");
     }
   };

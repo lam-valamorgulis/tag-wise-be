@@ -179,7 +179,7 @@ function validatePathContainKeyWords(components, keywords) {
       }
 
       // Add to configurable array with the delegate_descriptor_id as key
-      const configValues = negate ? ['AND NOT'].concat(pathValues) : pathValues;
+      const configValues = negate ? ['NOT'].concat(pathValues) : pathValues;
       result.settings.configurable.push({
         [delegateDescriptorId]: configValues,
       });
