@@ -1,9 +1,9 @@
-import { CSSProperties } from 'react';
+import { CSSProperties } from "react";
 
 export const commonButtonStyle: CSSProperties = {
   fontSize: "12px",
   padding: "0 8px",
-  margin: "0 8px",
+  margin: "0 6px",
   height: "auto",
   borderColor: "blue",
   color: "#333",
@@ -11,7 +11,7 @@ export const commonButtonStyle: CSSProperties = {
 
 export const commonTextStyle: CSSProperties = {
   fontSize: "12px",
-  margin: "0 8px",
+  margin: "0 4px",
   color: "#333",
 } as const;
 
@@ -26,12 +26,12 @@ export const currentNumberStyle: CSSProperties = {
 export const revisionContainerStyle: CSSProperties = {
   display: "flex",
   alignItems: "center",
-  gap: "8px",
+  gap: "4px",
   width: "100%",
 } as const;
 
 export const revisionInfoStyle: CSSProperties = {
   display: "flex",
   alignItems: "center",
-  minWidth: "200px",
+  minWidth: "180px",
 } as const;

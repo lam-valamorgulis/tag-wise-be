@@ -70,8 +70,6 @@ export default function LibraryDetail() {
     return <Loading />;
   }
 
-  console.log(apiData);
-
   return (
     <div className="px-3">
       <Row

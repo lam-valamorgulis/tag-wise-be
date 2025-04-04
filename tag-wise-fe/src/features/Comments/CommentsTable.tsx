@@ -329,7 +329,7 @@ const CommentsTable: React.FC = () => {
             setIsModalOpen(true);
           }}
         >
-          Add Comment
+          Add
         </Button>
       </div>
 

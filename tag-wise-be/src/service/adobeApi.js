@@ -32,7 +32,6 @@ const refreshAdobeToken = async () => {
       },
     );
 
-    // console.log('Token retrieved successfully:', response.data);
     adobeToken = response.data.access_token;
     tokenExpiresAt = Date.now() + response.data.expires_in * 1000;
   } catch (error) {

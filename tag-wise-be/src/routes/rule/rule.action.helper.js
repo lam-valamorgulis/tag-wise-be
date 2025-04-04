@@ -87,7 +87,6 @@ function validateActions(components, keywords) {
         }
       });
     }
-    console.log(keywords, 90);
     // Enhanced check for invalid queries
     if (keywords && keywords.length > 0) {
       keywords.forEach((keyword) => {

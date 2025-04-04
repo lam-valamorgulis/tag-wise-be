@@ -89,7 +89,6 @@ const HqRule: React.FC = () => {
   const rowSelection: TableProps<Property>["rowSelection"] = {
     onChange: (_selectedRowKeys: React.Key[], selectedRows: Property[]) => {
       const selectedIds = selectedRows.map((row) => row.propertyId);
-      console.log("Selected Properties:", selectedRows);
       setSelectedPropertyIds(selectedIds);
     },
   };

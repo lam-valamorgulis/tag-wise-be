@@ -73,7 +73,7 @@ const CommonLayout = () => {
             {
               key: "3",
               icon: <CommentOutlined />,
-              label: "Comments Template",
+              label: "Comments & Case Study",
             },
             {
               key: "4",

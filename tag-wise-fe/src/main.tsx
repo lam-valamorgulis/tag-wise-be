@@ -7,7 +7,6 @@ import { Auth0ProviderWithNavigate } from "./components/Auth0ProviderWithNavigat
 import { GeneralInformationProvider } from "./context/GeneralInformationProvider";
 import "./index.css";
 import { THEME_OPTIONS } from "./utils/const";
-console.log("Before mounting React"); // Debugging log
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

@@ -22,10 +22,6 @@ async function getLibraryByIdApi(libraryId) {
 }
 
 async function createAdobeLibraryApi(propertyId, libraryName) {
-  console.log(
-    `Creating Library "${libraryName}" for Property ID: ${propertyId}`,
-  );
-
   try {
     const response = await adobeApi.post(
       `/properties/${propertyId}/libraries`,
@@ -39,7 +35,6 @@ async function createAdobeLibraryApi(propertyId, libraryName) {
       },
     );
 
-    console.log('Library Created:', response.data);
     return response.data;
   } catch (error) {
     if (error.response) {
@@ -57,8 +52,6 @@ async function createAdobeLibraryApi(propertyId, libraryName) {
 }
 
 async function searchAdobeApi(keyWords, relationships) {
-  console.log('Searching:', keyWords);
-
   try {
     const response = await adobeApi.post('/search', {
       data: {
@@ -101,8 +94,6 @@ async function searchAdobeApi(keyWords, relationships) {
 }
 
 async function searchPropertyApi(propertyId) {
-  console.log('Searching for propertyId:', propertyId);
-
   try {
     const response = await adobeApi.get(`/libraries/${propertyId}/property`);
 
@@ -124,8 +115,6 @@ async function searchPropertyApi(propertyId) {
 }
 
 async function searchCompanyApi(companyId) {
-  console.log('Searching for companyId:', companyId);
-
   try {
     const response = await adobeApi.get(`/companies/${companyId}`);
 
@@ -147,8 +136,6 @@ async function searchCompanyApi(companyId) {
 }
 
 async function getRulesLibraryAdobeApi(libraryId) {
-  console.log('Searching for property:', libraryId);
-
   try {
     const response = await adobeApi.get(
       `/libraries/${libraryId}/rules?page[size]=100&page[number]=1`,
