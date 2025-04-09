@@ -36,5 +36,8 @@ const commentSchema = new mongoose.Schema({
 
 // Add text index for search functionality
 commentSchema.index({ purpose: 'text', comment: 'text' });
+commentSchema.index({ category: 1 }); // For filtering by category
+commentSchema.index({ createdAt: -1 }); // For sorting by createdAt desc
+commentSchema.index({ category: 1, createdAt: -1 }); // Compound index for category + createdAt queries
 
 module.exports = mongoose.model('Comment', commentSchema);
