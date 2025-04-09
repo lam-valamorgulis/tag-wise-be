@@ -9,7 +9,7 @@ import {
 } from "./styles/RuleLabel.ts";
 import { RuleLabelProps } from "./type";
 
-const SPECIAL_VENDORS = ["sprinklr", "medallia", "beusable"];
+const SPECIAL_VENDORS = ["sprinklr", "medallia", "beusable", "trustarc"];
 
 // Add this helper function
 const containsVendorName = (ruleName: string): boolean => {

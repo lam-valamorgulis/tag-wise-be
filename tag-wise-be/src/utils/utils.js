@@ -160,7 +160,7 @@ function isWithinThreeDays(dateString) {
     const diffMs = Math.abs(targetDate - now);
 
     // Convert 3 days to milliseconds (3 days * 24 hours * 60 minutes * 60 seconds * 1000 ms)
-    const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
+    const threeDaysMs = 2 * 24 * 60 * 60 * 1000;
 
     // Return true if difference is less than or equal to 3 days
     return diffMs <= threeDaysMs;

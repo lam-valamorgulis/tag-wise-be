@@ -121,8 +121,7 @@ const CheckConditions: React.FC<CheckConditionsProps> = ({
           <span>• InValid Keyword in URL</span>
           {checkCondition?.checkPathString?.isContainPathQuery &&
             renderStatus(
-              checkCondition?.checkPathString?.settings?.inValidQuery.length <=
-                0
+              checkCondition?.checkPathString?.settings?.inValidQuery.length < 0
             )}
         </div>
         <div style={testItemStyle}>
