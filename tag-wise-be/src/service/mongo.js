@@ -5,9 +5,13 @@ const MONGO_URL = process.env.MONGO_URL || 'mongodb://localhost:27017/tagwise';
 
 // Remove deprecated options and add recommended ones
 const mongooseOptions = {
-  serverSelectionTimeoutMS: 5000, // Server selection timeout
-  socketTimeoutMS: 45000, // Socket timeout
-  family: 4, // Use IPv4, skip trying IPv6
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+  family: 4,
+  maxPoolSize: 20, // Increase pool size for concurrency
+  minPoolSize: 10, // Maintain minimum connections
+  autoIndex: process.env.NODE_ENV !== 'production', // Disable auto-indexing in production
+  connectTimeoutMS: 10000, // Timeout for initial connection
 };
 
 mongoose.connection.once('open', () => {
