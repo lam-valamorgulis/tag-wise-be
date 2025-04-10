@@ -279,22 +279,42 @@ const CommentsTable: React.FC = () => {
   };
 
   const handleSearch = (value: string) => {
-    const newParams = new URLSearchParams(searchParams);
+    const newParams = new URLSearchParams();
+
+    // Set new search term if it exists
     if (value) {
       newParams.set("searchTerm", value);
-    } else {
-      newParams.delete("searchTerm");
     }
+
+    // Keep category if it exists
+    if (category) {
+      newParams.set("category", category);
+    }
+
+    // Reset pagination to defaults
+    newParams.set("page", "1");
+    newParams.set("limit", "5");
+
     setSearchParams(newParams);
   };
 
   const handleCategoryChange = (value: string) => {
-    const newParams = new URLSearchParams(searchParams);
+    const newParams = new URLSearchParams();
+
+    // Set new category if it exists
     if (value) {
       newParams.set("category", value);
-    } else {
-      newParams.delete("category");
     }
+
+    // Keep search term if it exists
+    if (searchTerm) {
+      newParams.set("searchTerm", searchTerm);
+    }
+
+    // Reset pagination to defaults
+    newParams.set("page", "1");
+    newParams.set("limit", "5");
+
     setSearchParams(newParams);
   };
 
