@@ -36,14 +36,10 @@ export function GeneralInformationProvider({
   children,
 }: GeneralInformationProviderProps) {
   const [libraryId, setLibraryId] = useState<string>("");
-  const [libraryName, setLibraryName] = useState<string>(
-    "Uyen Dang Test  1 - !@#$%^&*()_+"
-  );
+  const [libraryName, setLibraryName] = useState<string>("");
   const [libraryTotal, setLibraryTotal] = useState<number>(0);
   const [propertyId, setPropertyId] = useState<string>("");
-  const [propertyName, setPropertyName] = useState<string>(
-    "[CNX Ops] Test Property_0613"
-  );
+  const [propertyName, setPropertyName] = useState<string>("");
   const [options, setOptions] = useState<Options>({
     isShopSection: false,
     isRequiredConsent: false,

@@ -25,7 +25,9 @@ async function getRuleComponentsAdobeApi(ruleId) {
 
 async function getRulesLibraryAdobeApi(libraryId) {
   try {
-    const response = await adobeApi.get(`/libraries/${libraryId}/rules`);
+    const response = await adobeApi.get(
+      `/libraries/${libraryId}/rules?page[size]=50`,
+    );
 
     return response.data;
   } catch (error) {

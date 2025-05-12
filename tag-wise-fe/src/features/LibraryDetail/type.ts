@@ -166,9 +166,14 @@ interface CheckActionsData {
   type: string[];
   settings: CheckActionsSettings;
 }
+interface CheckOtherActionsData {
+  isContainedOtherActions: boolean;
+  extensions: string[];
+}
 
 interface CheckActions {
   checkActions: CheckActionsData;
+  checkOtherActions: CheckOtherActionsData;
 }
 
 // Top-level interface for the entire data structure

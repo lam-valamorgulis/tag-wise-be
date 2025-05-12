@@ -72,26 +72,13 @@ function validateActions(components, keywords) {
     });
 
     // Update the single variable check
-    if (settings.source) {
-      const singleVarPatterns = [
-        { type: 'var', pattern: /var\s+[sS]\b/ },
-        { type: 'function', pattern: /function\s+[sS]\b/ },
-      ];
-
-      singleVarPatterns.forEach(({ category, pattern }) => {
-        if (pattern.test(settings.source)) {
-          result.settings.singleVariable.push({
-            category,
-            match: settings.source.match(pattern)[0],
-          });
-        }
-      });
-    }
-    // Enhanced check for invalid queries
     if (keywords && keywords.length > 0) {
       keywords.forEach((keyword) => {
-        // Create case-insensitive regex pattern for the keyword
-        const keywordPattern = new RegExp(keyword, 'i');
+        // Escape special regex characters in the keyword
+        const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        // Create case-insensitive regex pattern for the escaped keyword
+        const keywordPattern = new RegExp(escapedKeyword, 'i');
+
         if (
           keywordPattern.test(settingsStr) &&
           !result.settings.inValidQuery.includes(keyword)
@@ -100,6 +87,22 @@ function validateActions(components, keywords) {
         }
       });
     }
+
+    // Enhanced check for invalid queries
+  });
+
+  return result;
+}
+
+function validateOtherActions(otherActionComponents) {
+  const result = {
+    isContainedOtherActions: otherActionComponents.length > 0,
+    extensions: [],
+  };
+
+  otherActionComponents.forEach((component) => {
+    const descriptorId = component.attributes.delegate_descriptor_id;
+    result.extensions.push(descriptorId);
   });
 
   return result;
@@ -107,4 +110,5 @@ function validateActions(components, keywords) {
 
 module.exports = {
   validateActions,
+  validateOtherActions,
 };

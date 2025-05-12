@@ -114,6 +114,7 @@ function categorizeRuleComponents(components) {
     conditions: [],
     events: [],
     actions: [],
+    others: [],
   };
 
   components.forEach((component) => {
@@ -125,6 +126,8 @@ function categorizeRuleComponents(components) {
       categorized.events.push(component);
     } else if (descriptor.startsWith('core::actions::')) {
       categorized.actions.push(component);
+    } else {
+      categorized.others.push(component);
     }
   });
 

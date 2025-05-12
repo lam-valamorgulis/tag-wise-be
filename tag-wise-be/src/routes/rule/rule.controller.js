@@ -19,7 +19,10 @@ const {
   validateRuleInProductionComponents,
 } = require('./rule.condition.helper');
 
-const { validateActions } = require('./rule.action.helper');
+const {
+  validateActions,
+  validateOtherActions,
+} = require('./rule.action.helper');
 
 const { categorizeRuleComponents } = require('../../utils/utils');
 
@@ -60,7 +63,6 @@ async function httpValidateRule(req, res) {
 
     // Categorize the components
     const categorizedComponents = categorizeRuleComponents(rulesLibrary.data);
-
     // 2.Check Events
     //  a.check window loading
     const windowLoadComponents = categorizedComponents.events.filter(
@@ -126,12 +128,19 @@ async function httpValidateRule(req, res) {
       keywords,
     );
 
-    // check actions
+    // 4. Check
+    // a. check custom code actions
     const actionCodeComponents = categorizedComponents.actions.filter(
       (component) =>
         component.attributes.delegate_descriptor_id === ACTION_CUSTOM_CODE,
     );
+
     const checkActions = validateActions(actionCodeComponents, keywords);
+    // b. check other actions
+
+    const otherActionComponents = categorizedComponents.others;
+
+    const checkOtherActions = validateOtherActions(otherActionComponents);
 
     return res.status(200).json({
       checkName: checkName,
@@ -148,6 +157,7 @@ async function httpValidateRule(req, res) {
       },
       checkActions: {
         checkActions,
+        checkOtherActions,
       },
     });
   } catch (error) {

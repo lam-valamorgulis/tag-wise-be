@@ -18,7 +18,7 @@ function validateWindowLoad(
     type: [],
     order: '',
     isDataElementIncluded: {
-      isInclude: false,
+      isInclude: dataElementComponents.length > 0,
       settings: [],
     },
   };
@@ -43,6 +43,7 @@ function validateWindowLoad(
   result.order = minRuleOrder;
 
   // Validate data element inclusion based on isShopSection
+
   result.isDataElementIncluded.isInclude = isShopSection
     ? dataElementComponents.length > 0
     : true;

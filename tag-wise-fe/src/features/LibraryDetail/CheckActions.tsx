@@ -99,6 +99,19 @@ const CheckActions: React.FC<CheckActionsProps> = ({ checkActions }) => {
             )}
         </div>
       </div>
+
+      <h4 style={subHeaderStyle}>c. Check Other Actions</h4>
+      <div style={testItemStyle}>
+        <span>• Not included Extension</span>
+        {renderStatus(
+          !checkActions?.checkOtherActions?.isContainedOtherActions
+        )}
+      </div>
+      <div style={testItemStyle}>
+        <span>• Extensions</span>
+        {checkActions?.checkOtherActions?.isContainedOtherActions &&
+          renderList(checkActions?.checkOtherActions?.extensions, "#900")}
+      </div>
     </div>
   );
 };

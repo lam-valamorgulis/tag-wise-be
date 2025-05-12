@@ -91,6 +91,7 @@ function GeneralInfo() {
             {site_code}
           </Col>
         </Row>
+
         <Row className="border-b border-gray-200 h-10" align="middle">
           <Col span={8}>Library Name</Col>
           <Col span={16} className="text-red-500">

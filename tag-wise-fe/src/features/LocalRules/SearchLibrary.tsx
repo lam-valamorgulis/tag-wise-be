@@ -46,21 +46,6 @@ function SearchLibrary({
         autoComplete="off"
       >
         <Form.Item<FieldType>
-          name="libraryName"
-          initialValue={libraryName}
-          label="Library Name"
-          rules={[
-            { required: true, message: "Please input your Library Name!" },
-          ]}
-        >
-          <Input
-            placeholder="Library Name"
-            style={{ fontSize: "14px", height: "40px" }}
-            className="ml-2"
-          />
-        </Form.Item>
-
-        <Form.Item<FieldType>
           name="propertyName"
           initialValue={propertyName}
           label="Property Name"
@@ -70,6 +55,21 @@ function SearchLibrary({
         >
           <Input
             placeholder="Property Name"
+            style={{ fontSize: "14px", height: "40px" }}
+            className="ml-2"
+          />
+        </Form.Item>
+
+        <Form.Item<FieldType>
+          name="libraryName"
+          initialValue={libraryName}
+          label="Library Name"
+          rules={[
+            { required: true, message: "Please input your Library Name!" },
+          ]}
+        >
+          <Input
+            placeholder="Library Name"
             style={{ fontSize: "14px", height: "40px" }}
             className="ml-2"
           />
